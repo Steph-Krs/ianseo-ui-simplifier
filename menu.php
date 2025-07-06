@@ -1,5 +1,5 @@
 <?php
-include 'MenuMode/menu.php';
+include 'ianseo-ui-simplifier/menu.php';
 
 ?>
 
