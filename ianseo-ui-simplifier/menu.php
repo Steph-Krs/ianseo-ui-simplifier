@@ -1,68 +1,72 @@
 <?php
 
+
+
+
 if(!empty($on) AND isset($ret['MODS'])) {
 	$ret['MODS']['ui-simplifier'] = 'UI Simplifier 👁️🔒'.'|'.$CFG->ROOT_DIR.'Modules/Custom/ianseo-ui-simplifier/App/settings.php';
 }
 
+// on suppose que session_start() est déjà fait dans config.php
 
+// Lecture cookie au lieu de $_SESSION
+$ultraBasique = (isset($_COOKIE['ultra_basique']) && $_COOKIE['ultra_basique'] === '1');
 
-if (!empty($_SESSION['hidden_menus'])) {
-    echo "<script>\n";
-    echo "document.addEventListener('DOMContentLoaded', function(){\n";
-    foreach ($_SESSION['hidden_menus'] as $href) {
-        $safe = addslashes($href);
-        printf(
-            "  document.querySelectorAll('li > a[href=\"%s\"]').forEach(function(el){\n" .
-            "    var li = el.parentNode;\n" .
-            "    // supprimer tous les <hr> consécutifs\n" .
-            "    var sib = li.nextElementSibling;\n" .
-            "    while(sib && sib.tagName === 'HR'){\n" .
-            "      var toRem = sib;\n" .
-            "      sib = sib.nextElementSibling;\n" .
-            "      toRem.remove();\n" .
-            "    }\n" .
-            "    // supprimer le <li>\n" .
-            "    li.remove();\n" .
-            "  });\n",
-            $safe
-        );
+if ($ultraBasique) {
+    require_once __DIR__ . '/App/ultra-basique.css.php';
+    $css = getUltraBasiqueCSS();
+    if ($css !== '') {
+        echo "<!-- Ultra basique CSS injecté -->\n";
+        echo "<style>\n{$css}</style>\n";
+    } else {
+        echo "<!-- Ultra basique CSS généré, mais vide pour cette page -->\n";
     }
-    // suppression des <ul> vides
-    echo "  document.querySelectorAll('ul').forEach(function(ul){\n";
-    echo "    if (!ul.querySelector('li')) ul.remove();\n";
-    echo "  });\n";
-
-    // NOUVEAU : suppression des LI ne contenant que <a href=\"#url\">
-    echo "  document.querySelectorAll('li').forEach(function(li){\n";
-    echo "    var a = li.querySelector(':scope > a[href=\"#url\"]');\n";
-    echo "    if (a && li.children.length === 1) {\n";
-    echo "      li.remove();\n";
-    echo "    }\n";
-    echo "  });\n";
-
-    // Suppression des <hr> qui n'ont pas un <li> juste avant ET juste après
-    echo "  document.querySelectorAll('hr').forEach(function(hr){\n";
-    echo "    var prev = hr.previousElementSibling;\n";
-    echo "    var next = hr.nextElementSibling;\n";
-    echo "    if (!prev || prev.tagName !== 'LI' || !next || next.tagName !== 'LI') {\n";
-    echo "      hr.remove();\n";
-    echo "    }\n";
-    echo "  });\n";
-
-    // suppression des <ul> vides
-    echo "  document.querySelectorAll('ul').forEach(function(ul){\n";
-    echo "    if (!ul.querySelector('li')) ul.remove();\n";
-    echo "  });\n";
-
-    // NOUVEAU : suppression des LI ne contenant que <a href=\"#url\">
-    echo "  document.querySelectorAll('li').forEach(function(li){\n";
-    echo "    var a = li.querySelector(':scope > a[href=\"#url\"]');\n";
-    echo "    if (a && li.children.length === 1) {\n";
-    echo "      li.remove();\n";
-    echo "    }\n";
-    echo "  });\n";
-
-    echo "});\n";
-    echo "</script>\n";
 }
+
 ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const stored = localStorage.getItem('hidden_menus');
+  if (!stored) return;
+  stored.split(',').forEach(function(href) {
+    document.querySelectorAll('li > a[href="' + href + '"]').forEach(function(el) {
+      // supprimer les <hr> consécutifs
+      let sib = el.parentNode.nextElementSibling;
+      while (sib && sib.tagName === 'HR') {
+        const toRem = sib;
+        sib = sib.nextElementSibling;
+        toRem.remove();
+      }
+      // puis le <li>
+      el.parentNode.remove();
+    });
+  });
+  // nettoyage des <ul> vides
+  document.querySelectorAll('ul').forEach(function(ul) {
+    if (!ul.querySelector('li')) ul.remove();
+  });
+  // suppression des <li> ne contenant que <a href="#url">
+  document.querySelectorAll('li').forEach(function(li) {
+    const a = li.querySelector(':scope > a[href="#url"]');
+    if (a && li.children.length === 1) li.remove();
+  });
+  // suppression des <hr> isolés
+  document.querySelectorAll('hr').forEach(function(hr) {
+    const prev = hr.previousElementSibling;
+    const next = hr.nextElementSibling;
+    if (!prev || prev.tagName !== 'LI' || !next || next.tagName !== 'LI') {
+      hr.remove();
+    }
+  });
+  // nettoyage des <ul> vides
+  document.querySelectorAll('ul').forEach(function(ul) {
+    if (!ul.querySelector('li')) ul.remove();
+  });
+  // suppression des <li> ne contenant que <a href="#url">
+  document.querySelectorAll('li').forEach(function(li) {
+    const a = li.querySelector(':scope > a[href="#url"]');
+    if (a && li.children.length === 1) li.remove();
+  });
+});
+</script>

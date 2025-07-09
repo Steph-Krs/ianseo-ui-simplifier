@@ -1,13 +1,43 @@
 <?php
-// 1) Bootstrap ianseo
+// 1) Si on vient du formulaire Settings…
+if ($_SERVER['REQUEST_METHOD'] === 'POST'
+    && ($_POST['form_type'] ?? '') === 'settings'
+) {
+    // checkbox cochée ou non
+    $enabled = isset($_POST['ultra_basique']) && $_POST['ultra_basique'] === '1';
+    // écriture du cookie 30 jours
+    setcookie(
+        'ultra_basique',
+        $enabled ? '1' : '0',
+        time() + 30*24*3600,
+        '/',    // path
+        '',     // domaine courant
+        false,  // secure (mettre true en prod HTTPS)
+        true    // httponly
+    );
+    // PRG pour ne pas repost et pour vider $_POST
+    header('Location:' . $_SERVER['REQUEST_URI']);
+    exit;
+}
+
+// 2) Ensuite seulement, on charge la conf et le head //cookie 2 avant...
+
+// 3) Lecture du cookie pour l’affichage
+$ultraBasique = (isset($_COOKIE['ultra_basique']) && $_COOKIE['ultra_basique'] === '1');
+
+// 4) Ton debug (optionnel, à retirer en prod)
+echo '<!-- DEBUG SETTINGS | COOKIE_ultra_basique=' 
+     . ($_COOKIE['ultra_basique'] ?? 'none') 
+     . ' -->';
+
+$hidden = []; // sera géré en JS via localStorage
+
+// 1) Inclusion de la conf et du head
 require_once dirname(__FILE__, 5) . '/config.php';
 include 'Common/Templates/head.php';
 
-// 2) Session & POST
-$hidden = $_SESSION['hidden_menus'] ?? [];
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $_SESSION['hidden_menus'] = $_POST['hidden'] ?? [];
-}
+
+
 // 3) Lecture CSV
 $csvFile = 'correspondance.csv';
 $lines = array_map(fn($l)=>str_getcsv($l, ';'), file($csvFile, FILE_SKIP_EMPTY_LINES));
@@ -202,6 +232,18 @@ function multi_get_text(string $key): string {
     #sm_left h2{
         text-align:center;
     }
+    .ligne{
+        display:flex;
+        align-items:center;
+    }
+    .colonne{
+        display:flex;
+        flex-direction:row;
+        align-items:center;
+    }
+    p{
+        margin-top:0;
+    }
     .Chck_all {
         padding:6px;width:40%;text-align:center;
     }
@@ -248,17 +290,54 @@ function multi_get_text(string $key): string {
   <div id="sm_left">
     
     <h2><?= htmlspecialchars(multi_get_text('TVPresetChains'), ENT_QUOTES, 'UTF-8') ?></h2>
-    <button id="btnSimple"><?= htmlspecialchars(multi_get_text('Base'), ENT_QUOTES, 'UTF-8') ?></button>
-    <b>Pour les novices :</b> limité à un tir de classement.
-    <p><i>C'est pas faux!🗡️</i></p>
+    <div class="ligne">
+        <div class="colonne">
+        <button id="btnSimple"><?= htmlspecialchars(multi_get_text('Base'), ENT_QUOTES, 'UTF-8') ?></button>
+    
+        <b>Pour les novices :</b> limité à un tir de classement.
+        </div>
+        <div style="display:flex;align-items:center;border: solid; border-color: #117;border-width: 1px; padding : 5px;margin:5px 5px 5px 20px">
+            <form method="post" action="">
+                <input type="hidden" name="form_type" value="settings">
+                <div class="form-group">
+                    <label>
+                    <input
+                        type="checkbox"
+                        name="ultra_basique"
+                        value="1"
+                        <?= $ultraBasique ? 'checked' : '' ?>
+                        onchange="this.form.querySelector('button[type=submit]').click()"
+                    >
+                    mode tuto
+                    </label>
+                    <button type="submit" class="btn btn-primary" style="display:none;">save</button>
+                </form>
+            </div>
+        </div>    
+    </div>
+    <div class="ligne">
+        <p><i>C'est pas faux!🗡️</i></p>
+    </div>
     <br><br>
-    <button id="btnAvance"><?= htmlspecialchars(multi_get_text('AdvancedMode'), ENT_QUOTES, 'UTF-8') ?></button>
-    <b>Pour les initiés :</b> matchs, téléphones, affichages en direct, accréditations/dossards, mode présentateur.
-    <p><i>Un grand pouvoir implique de grandes responsabilités.🕷️</i></p>
+    <div class="ligne">
+        <div class="colonne">
+            <button id="btnAvance"><?= htmlspecialchars(multi_get_text('AdvancedMode'), ENT_QUOTES, 'UTF-8') ?></button>
+            <b>Pour les initiés :</b> matchs, téléphones, affichages en direct, accréditations/dossards, mode présentateur.
+        </div>
+    </div>
+    <div class="ligne">
+        <p><i>Un grand pouvoir implique de grandes responsabilités.🕷️</i></p>
+    </div>
     <br><br>
-    <button id="btnExpert">Mode Expert</button>
-    <b>Pour les audacieux :</b> tout IANSEO sans limitation.
-    <p><i>La route ? Là où on va, on n'a pas besoin de route...🛹</i></p>
+    <div class="ligne">
+        <div class="colonne">
+            <button id="btnExpert">Mode Expert</button>
+            <b>Pour les audacieux :</b> tout IANSEO sans limitation.
+        </div>
+    </div>
+    <div class="ligne">
+        <p><i>La route ? Là où on va, on n'a pas besoin de route...🛹</i></p>
+    </div>
     <br><br>
     <h3>À quoi sert ce module ?</h3>
     <p>
@@ -275,6 +354,7 @@ function multi_get_text(string $key): string {
   <!-- DROITE -->
 <div id="sm_right">
     <h2><?= multi_get_text('SetupManually') ?></h2>
+
         <div id="bloc_rapide">
             <button id="checkAll" class="Chck_all">☑️ <?= htmlspecialchars(multi_get_text('SelectAll'), ENT_QUOTES, 'UTF-8') ?> 🔒</button>
             <button id="uncheckAll" class="Chck_all">🔲 <?= htmlspecialchars(multi_get_text('NoRowSelected'), ENT_QUOTES, 'UTF-8') ?> 👁️</button>
@@ -283,9 +363,10 @@ function multi_get_text(string $key): string {
 
     <?php $idx1 = 0;?>
     <form method="post" id="menuForm" target="hidden_iframe">
-    
-        <iframe name="hidden_iframe" src="about:blank" style="display:none;"></iframe>
+        <!-- nouveau champ pour indiquer « formulaire de menus » -->
+        <input type="hidden" name="form_type" value="menu">
 
+        <iframe name="hidden_iframe" src="about:blank" style="display:none;"></iframe>
         <button type="submit" style="display:none;">💾 <?= htmlspecialchars(multi_get_text('SettingsSaveConfig'), ENT_QUOTES, 'UTF-8') ?></button>
         <?php foreach ($data as $lvl1 => $sub1): ?>
             <?php $idx1++; ?>
@@ -413,7 +494,18 @@ document.addEventListener('DOMContentLoaded', function(){
     document.querySelectorAll('.toggle-all')
             .forEach(toggle => updateToggle(toggle));
   }
+// → 1) Restaure les cases enfants d'après localStorage
 
+var stored = localStorage.getItem('hidden_menus');
+
+if (stored) {
+    stored.split(',').forEach(function(href){
+        var cb = document.querySelector(
+            'input[name="hidden[]"][value="'+href+'"]'
+            );
+            if (cb) cb.checked = true;
+            });
+        }
   // on initialise l'état des toggles
   refreshAllToggles();
 
@@ -435,70 +527,92 @@ document.addEventListener('DOMContentLoaded', function(){
       refreshAllToggles();
     });
   });
+  
 
 }); 
 
 </script>
 
 <script>
+(function(){
+  function initMenuForm() {
+    const form = document.getElementById('menuForm');
+    if (!form) return;
+
+    // 1) Restauration des cases enfant
+    const stored = localStorage.getItem('hidden_menus');
+    if (stored) {
+      stored.split(',').forEach(href => {
+        const cb = form.querySelector('input[name="hidden[]"][value="' + href + '"]');
+        if (cb) cb.checked = true;
+      });
+      // Recalcule des parent‐toggles
+      if (typeof refreshAllToggles === 'function') {
+        refreshAllToggles();
+      }
+    }
+
+    // utilitaire de sauvegarde + reload
+    function saveAndReload(delay = 1500) {
+      const checked = Array.from(
+        form.querySelectorAll('input[name="hidden[]"]:checked')
+      ).map(cb => cb.value);
+      localStorage.setItem('hidden_menus', checked.join(','));
+      clearTimeout(window._menuSaveTimeout);
+      window._menuSaveTimeout = setTimeout(() => window.location.reload(), delay);
+    }
+
+    // 2) Ne déclencher que sur vrai clic utilisateur
+    form.addEventListener('change', function(e) {
+      if (!e.isTrusted || !e.target.matches('input[name="hidden[]"]')) return;
+      saveAndReload();
+    });
+
+    // 3) Boutons Tout cocher / Tout décocher
+    document.getElementById('checkAll')?.addEventListener('click', () => {
+      form.querySelectorAll('input[name="hidden[]"]').forEach(cb => cb.checked = true);
+      saveAndReload(0);
+    });
+    document.getElementById('uncheckAll')?.addEventListener('click', () => {
+      form.querySelectorAll('input[name="hidden[]"]').forEach(cb => cb.checked = false);
+      saveAndReload(0);
+    });
 
 
-// iframe → reload en GET?saved=1
-document.querySelector('iframe[name="hidden_iframe"]').addEventListener('load',()=>{
-  const u=new URL(window.location.href);
-  u.searchParams.set('saved','1');
-  window.location.href=u;
-});
+    // 4) Presets
+      // 4) Presets (utilise vos variables presetSimple / presetAvance existantes)
+  function applyPreset(list) {
+    form.querySelectorAll('input[name="hidden[]"]').forEach(cb => {
+      cb.checked = list.includes(cb.value);
+    });
+    saveAndReload(0);
+  }
+    document.getElementById('btnSimple')?.addEventListener('click', () => {
+      applyPreset(presetSimple);
+      saveAndReload(0);
+    });
+    document.getElementById('btnAvance')?.addEventListener('click', () => {
+      applyPreset(presetAvance);
+      saveAndReload(0);
+    });
+    document.getElementById('btnExpert')?.addEventListener('click', () => {
+      form.querySelectorAll('input[name="hidden[]"]').forEach(cb => cb.checked = false);
+      saveAndReload(0);
+    });
+  }
 
+  // Si le document n'est pas encore prêt, on attend DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMenuForm);
+  } else {
+    // Sinon on peut init tout de suite, MAIS potentiellement avant que certains composants
+    // (venant d'includes) soient injectés : on s'assure aussi via window.load
+    initMenuForm();
+  }
 
+  // Enfin, on réessaie à la load du window pour les cas “lien direct”
+  window.addEventListener('load', initMenuForm);
+})();
 
-// tout cocher / décocher
-document.getElementById('checkAll').onclick = ()=> {
-  document.querySelectorAll('#menuForm input[type=checkbox]').forEach(cb=>cb.checked=true);
-  document.getElementById('menuForm').submit();
-};
-document.getElementById('uncheckAll').onclick = ()=> {
-  document.querySelectorAll('#menuForm input[type=checkbox]').forEach(cb=>cb.checked=false);
-  document.getElementById('menuForm').submit();
-};
-document.querySelectorAll('#menuForm input[type=checkbox]').forEach(function(cb){
-  cb.addEventListener('change', function(){
-    // on annule un éventuel timeout existant
-    if (window._menuSaveTimeout) clearTimeout(window._menuSaveTimeout);
-    // on planifie le submit dans 1.5 secondes
-    window._menuSaveTimeout = setTimeout(function(){
-      document.getElementById('menuForm').submit();
-    }, 1500);
-  });
-});
-
-// boutons modes simplifié/avancé/expert à adapter
-// fonction utilitaire pour appliquer un preset
-function applyPreset(list) {
-  document.querySelectorAll('#menuForm input[type=checkbox]').forEach(cb => {
-    cb.checked = list.includes(cb.value);
-    //console.log("list coché = ",list);
-    //console.log("cb.value = ",cb.value);
-  });
-  // on soumet via iframe (reload automatique)
-  document.getElementById('menuForm').submit();
-}
-
-// bouton “Mode simplifié”
-document.getElementById('btnSimple').onclick = () => {
-    //console.log("mode simplifié = ",presetSimple);
-  applyPreset(presetSimple);
-  
-};
-
-// bouton “Mode avancé”
-document.getElementById('btnAvance').onclick = () => {
-  applyPreset(presetAvance);
-};
-
-// bouton “Mode expert” : décoche tout
-document.getElementById('btnExpert').onclick = () => {
-  document.querySelectorAll('#menuForm input[type=checkbox]').forEach(cb => cb.checked = false);
-  document.getElementById('menuForm').submit();
-};
 </script>
+

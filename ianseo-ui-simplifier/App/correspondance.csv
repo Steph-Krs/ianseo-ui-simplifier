@@ -1,4 +1,4 @@
-Niveau1;Niveau2;Niveau3;URL;Base;Avancé
+Niveau1;Niveau2;Niveau3;URL;Base;Avancï¿½
 MenuLM_Competition;;;;;
 MenuLM_Competition;MenuLM_Open;;index.php;;
 MenuLM_Competition;MenuLM_Close;;Common/TourOff.php;;
@@ -63,7 +63,7 @@ MenuLM_Participants;MenuLM_Athlete Status Management;;Partecipants/ManStatus.php
 MenuLM_Participants;MenuLM_IrmManagement;;Partecipants/ManIrmStatus.php;X;
 MenuLM_Participants;MenuLM_Target;;;;
 MenuLM_Participants;MenuLM_Target;MenuLM_Manual Assignment;Partecipants/SetTarget_default.php?Ses=*;;
-MenuLM_Participants;MenuLM_Target;MenuLM_Draw;Partecipants/SetTarget_auto.php;;
+MenuLM_Participants;MenuLM_Target;MenuLM_Draw;Partecipants/SetTarget_auto.php;X;
 MenuLM_Participants;MenuLM_Target;MenuLM_MoveSession;Partecipants/MoveSession.php;X;X
 MenuLM_Participants;MenuLM_Target;MenuLM_MoveTarget;Partecipants/MoveTarget.php;X;X
 MenuLM_Participants;MenuLM_Target;MenuLM_TargetFromRank;Partecipants/TargetFromRank.php;X;X
@@ -90,7 +90,7 @@ MenuLM_Participants;MenuLM_Printout;;Partecipants/PrintOut.php;;
 MenuLM_Participants;MenuLM_Speaker;;Modules/Speaker/participants.php;X;
 MenuLM_Qualification;;;;;
 MenuLM_Qualification;MenuLM_Input Score;;;;
-MenuLM_Qualification;MenuLM_Input Score;MenuLM_Standard Table;Qualification/index.php;;
+MenuLM_Qualification;MenuLM_Input Score;MenuLM_Standard Table;Qualification/index.php;X;
 MenuLM_Qualification;MenuLM_Input Score;MenuLM_Extended Table;Qualification/index_all.php;;
 MenuLM_Qualification;MenuLM_Input Score;MenuLM_Arrow by Arrow (Advanced user);Qualification/WriteArrows.php;X;
 MenuLM_Qualification;MenuLM_Input Score;MenuLM_Arrow by Arrow (Scorecards);Qualification/WriteScoreCard.php;X;
