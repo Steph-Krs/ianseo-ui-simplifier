@@ -1,11 +1,23 @@
 <?php
 
+// 1. Calcule le chemin relatif au répertoire web (DOCUMENT_ROOT)
+$relativePath = str_replace(
+    realpath($_SERVER['DOCUMENT_ROOT']),
+    '',
+    realpath(__DIR__)
+);
 
+// 2. Construit le schéma (http ou https) + host
+$scheme   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host     = $_SERVER['HTTP_HOST'];
+$baseUrl  = "{$scheme}://{$host}";
 
+// 3. Monte l’URL finale vers App/settings.php
+$ret['MODS']['ui-simplifier'] = 'UI Simplifier 👁️🔒|' 
+    . $baseUrl 
+    . $relativePath 
+    . '/App/settings.php';
 
-if(!empty($on) AND isset($ret['MODS'])) {
-	$ret['MODS']['ui-simplifier'] = 'UI Simplifier 👁️🔒'.'|'.$CFG->ROOT_DIR.'Modules/Custom/ianseo-ui-simplifier/App/settings.php';
-}
 
 // on suppose que session_start() est déjà fait dans config.php
 
