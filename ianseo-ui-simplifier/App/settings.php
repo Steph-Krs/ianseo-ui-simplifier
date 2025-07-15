@@ -216,48 +216,12 @@ function multi_get_text(string $key): string {
 }
 ?>
 <style>
-    /* layout 2 colonnes *//*
-    #sm_container {
-        display:flex;
-        gap:1em;
-    }*/
-    
-    /* gauche *//*
-    #sm_left { flex:2; border: solid; border-color: #117;border-width: 1px; padding : 5px;margin:5px}
-    #sm_left button{
-        padding:6px;
-        margin:6px;
-        text-align:center;
-    }
-    #sm_left h2{
-        text-align:center;
-    }
-    .ligne{
-        display:flex;
-        align-items:center;
-    }
-    .colonne{
-        display:flex;
-        flex-direction:row;
-        align-items:center;
-    }*/
     p{
         margin-top:0;
     }
     .Chck_all {
         padding:6px;width:40%;text-align:center;
     }
-    #savedMsg{
-        margin: 0 5%;padding:5px;text-align:center;font-weight:900;color:white; background-color:#117; opacity:1; transition:opacity 0.5s ease;
-    }
-    /* droite *//*
-    #sm_right { flex:3; border: solid; border-color: #117;border-width: 1px; padding : 5px;margin:5px}
-    #sm_right h2{
-        text-align:center;
-    }
-    #bloc_rapide {
-        display:flex;align-items:center;justify-content: space-evenly;
-    }*//
     /* typographie */
   details > summary.lvl1 { font-size:1.2em; cursor:pointer; }
   .lvl2-item, details > summary.lvl2{  margin-left:20px;font-size:1.1em; cursor:pointer; }
@@ -270,34 +234,57 @@ function multi_get_text(string $key): string {
   .lvl2-item label { display:flex; align-items:center; }
   .lvl3 { margin-left:40px; display:flex; align-items:center; }
   input[type=checkbox] { margin-right:0.5em; }
+
+/* conteneur gris discret */
+#save-progress-container {
+  width: 100%;
+  height: 12px;
+  background: #e0e0e0;
+  overflow: hidden;
+}
+
+/* barre verte qui va se remplir */
+#save-progress-bar {
+  width: 0;
+  height: 100%;
+  background: #4caf50;
+  transition: width linear;
+}
+#saved {
+  transition: opacity 0.5s ease;
+}
+.hidden {
+  opacity: 0;
+}
+
+
 </style>
-<?php if (isset($_GET['saved'])): ?>
-        <p id="savedMsg">
-            ✅ <?= htmlspecialchars(multi_get_text('SignatureSaved')) ?> ✅
-        </p>
-        <script>
-            document.addEventListener('DOMContentLoaded', function(){
-            setTimeout(function(){
-                const msg = document.getElementById('savedMsg');
-                if (msg) msg.style.opacity = '0';
-            }, 3000);
-            });
-        </script>
-    <?php endif; ?>
 
 
 <table class="Tabella">
     <tbody>
         <tr>
-            <th>A venir 1
+            <th>Status
             </th>
-            <th>A venir 2
+            <th>MaJ des préconfigurations
             </th>
         </tr>
         <tr>
-            <td>progression 1.5s + saved +uploaded
+            <td id="ProgressBar">
             </td>
-            <td>Upload CSV perso + MaJ CSV + msg new version available
+            <td id="update">
+            </td>
+        </tr>
+        <tr>
+            <td id="saved" style="text-align:center;">
+            </td>
+            <td>msg new version available
+            </td>
+        </tr>
+        <tr>
+            <td>uploaded
+            </td>
+            <td>Upload CSV perso
             </td>
         </tr>
         <tr>
@@ -327,7 +314,7 @@ function multi_get_text(string $key): string {
                                         </tr>
                                         <tr>
                                             <td>
-                                                <p><i>C'est pas faux!🗡️</i></p>
+                                                <p><i>C'est pas faux!</i></p>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -385,7 +372,7 @@ function multi_get_text(string $key): string {
                                         </tr>
                                         <tr>
                                             <td>
-                                                <p><i>Un grand pouvoir implique de grandes responsabilités.🕷️</i></p>
+                                                <p><i>Un grand pouvoir implique de grandes responsabilités.</i></p>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -411,7 +398,7 @@ function multi_get_text(string $key): string {
                                         </tr>
                                         <tr>
                                             <td>
-                                                <p><i>La route ? Là où on va, on n'a pas besoin de route...🛹</i></p>
+                                                <p><i>La route ? Là où on va, on n'a pas besoin de route...</i></p>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -650,15 +637,56 @@ if (stored) {
       }
     }
 
-    // utilitaire de sauvegarde + reload
-    function saveAndReload(delay = 1500) {
-      const checked = Array.from(
-        form.querySelectorAll('input[name="hidden[]"]:checked')
-      ).map(cb => cb.value);
-      localStorage.setItem('hidden_menus', checked.join(','));
-      clearTimeout(window._menuSaveTimeout);
-      window._menuSaveTimeout = setTimeout(() => window.location.reload(), delay);
-    }
+/**
+ * Affiche et anime la barre de progression dans le <td id="ProgressBar">
+ * pendant `delay` ms
+ */
+function showProgressBar(delay) {
+  const parent = document.getElementById('ProgressBar');
+  if (!parent) {
+    console.warn('[ProgressBar] Élément #ProgressBar non trouvé');
+    return;
+  }
+  // Vider le parent (supprime toute barre précédente)
+  parent.innerHTML = '';
+
+  // Crée conteneur et barre
+  const container = document.createElement('div');
+  container.id = 'save-progress-container';
+  const bar = document.createElement('div');
+  bar.id = 'save-progress-bar';
+  container.appendChild(bar);
+
+  // Insère dans le <td>
+  parent.appendChild(container);
+
+  // Lance la transition (après une frame)
+  requestAnimationFrame(() => {
+    bar.style.transition = `width ${delay}ms linear`;
+    bar.style.width = '100%';
+  });
+}
+
+/**
+ * Sauvegarde + reload avec feedback visuel dans #ProgressBar
+ */
+function saveAndReload(delay = 1500) {
+  const checked = Array.from(
+    form.querySelectorAll('input[name="hidden[]"]:checked')
+  ).map(cb => cb.value);
+
+  localStorage.setItem('hidden_menus', checked.join(','));
+
+  // on stocke qu’on vient de sauver
+  sessionStorage.setItem('saved_flag', '1');
+  
+
+  clearTimeout(window._menuSaveTimeout);
+  showProgressBar(delay);
+  window._menuSaveTimeout = setTimeout(() => {
+    window.location.reload();
+  }, delay);
+}
 
     // 2) Ne déclencher que sur vrai clic utilisateur
     form.addEventListener('change', function(e) {
@@ -711,6 +739,22 @@ if (stored) {
   // Enfin, on réessaie à la load du window pour les cas “lien direct”
   window.addEventListener('load', initMenuForm);
 })();
+document.addEventListener('DOMContentLoaded', () => {
+  const flag = sessionStorage.getItem('saved_flag');
 
+  const td = document.getElementById('saved');
+
+  if (flag && td) {
+    td.innerHTML = '✅ <strong><?= multi_get_text('SignatureSaved') ?>!</strong> 💾';
+    // on efface immédiatement pour ne pas réafficher au prochain reload
+    sessionStorage.removeItem('saved_flag');
+    // ✔️ Après 2 s, on efface le message
+    setTimeout(() => {
+  td.classList.add('hidden');
+  // ou pour tout enlever au bout d’1 s
+  setTimeout(() => td.innerHTML = '', 500);
+}, 2000);
+  }
+});
 </script>
 
