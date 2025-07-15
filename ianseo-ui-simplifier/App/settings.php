@@ -351,7 +351,7 @@ function multi_get_text(string $key): string {
             <td id="update">
                 <form method="post">
                     <button type="submit" name="update_module">
-                    🔄 Mettre à jour le module
+                    🔄 Mettre à jour le module et les pré-configurations par défaut
                     </button>
                 </form>
             </td>
