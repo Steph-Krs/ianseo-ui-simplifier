@@ -5,18 +5,13 @@
  *
  * @return string CSS généré
  */
-function getUltraBasiqueCSS(): string {
-    $css = '';
+function getUltraBasiqueJS(): string {
+    $js = '';
     $csvPath = __DIR__ . '/elements.csv';
     if (!is_readable($csvPath)) {
         error_log("ultra-basique.css.php : impossible de lire $csvPath");
         return '';
     }
-    $css .= "@keyframes blink {\n";
-    $css .= "  25%, 75% { opacity: 1; }\n";
-    $css .= "  50% { opacity: 0.2; }\n";
-    $css .= "}\n";
-    
 
     // URI et chemins normalisés
     $uriPath         = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); // /dir/page.php
@@ -30,7 +25,6 @@ function getUltraBasiqueCSS(): string {
                 continue;
             }
 
-            
             // Détermination du type de règle
             $rawRule           = trim($pageRule, '/');
             $isDirectoryRule   = substr($pageRule, -1) === '/';
@@ -70,16 +64,11 @@ function getUltraBasiqueCSS(): string {
 
             // Génération des règles CSS
             if ($hideFlag) {
-                // Définition des keyframes "blink"
-                $css .= "{$selList} { display: none !important; }\n";
-            }
-            if ($hlFlag) {
-                // Définition des keyframes "blink"
-                $css .= "{$selList} { background: limegreen !important; animation: blink 1.5s linear infinite; }\n";
+                $js = "Eléments 🔒";
             }
         }
         fclose($handle);
     }
 
-    return $css;
+    return $js;
 }

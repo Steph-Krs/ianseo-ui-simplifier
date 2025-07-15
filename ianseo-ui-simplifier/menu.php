@@ -13,7 +13,7 @@ $host     = $_SERVER['HTTP_HOST'];
 $baseUrl  = "{$scheme}://{$host}";
 
 // 3. Monte l’URL finale vers App/settings.php
-$ret['MODS']['ui-simplifier'] = 'Affichage 👁️🔒|' 
+$ret['MODS']['ui-simplifier'] = 'UI Simplifier 👁️🔒|' 
     . $baseUrl 
     . $relativePath 
     . '/App/settings.php';
@@ -21,20 +21,46 @@ $ret['MODS']['ui-simplifier'] = 'Affichage 👁️🔒|'
 
 // on suppose que session_start() est déjà fait dans config.php
 
+
+
+
 // Lecture cookie au lieu de $_SESSION
 $ultraBasique = (isset($_COOKIE['ultra_basique']) && $_COOKIE['ultra_basique'] === '1');
-
 if ($ultraBasique) {
-    require_once __DIR__ . '/App/ultra-basique.css.php';
-    $css = getUltraBasiqueCSS();
-    if ($css !== '') {
-        echo "<!-- Ultra basique CSS injecté -->\n";
-        echo "<style>\n{$css}</style>\n";
-    } else {
-        echo "<!-- Ultra basique CSS généré, mais vide pour cette page -->\n";
-    }
-}
+require_once __DIR__ . '/App/ultra-basique.css.php';
+$css = getUltraBasiqueCSS();
+require_once __DIR__ . '/App/ultra-basique.js.php';
+$js = getUltraBasiqueJS();
+if ($css !== '') {
+    echo "\n<!-- Ultra basique CSS injecté -->\n";
+    echo "<style>\n{$css}</style>\n";
+} else {
+    echo "<!-- Ultra basique CSS généré, mais vide pour cette page -->\n";
+};
+if ($js !== '') {
+    echo "\n<!-- Ultra basique JS injecté -->\n";
+   echo <<<HTML
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const nav = document.querySelector('#navigation > ul');
+  if (!nav) {
+    console.warn('[ui-simplifier] Navigation non trouvée, rien à faire.');
+    return;
+  }
+  if (!document.querySelector('#ui-simplifier-active-2')) {
+    nav.insertAdjacentHTML(
+      'beforeend',
+      '<li class="MenuTitle" id="ui-simplifier-active-2">' +
+      '<a style="font-size: 0.8em;font-weight: normal;pointer-events: none;"><i>{$js}</i></a>' +
+      '</li>'
+    );
+  }
+});
+</script>
+HTML;
 
+
+};}
 ?>
 
 <script>
@@ -42,6 +68,13 @@ document.addEventListener('DOMContentLoaded', function() {
   const stored = localStorage.getItem('hidden_menus');
   if (!stored) return;
   stored.split(',').forEach(function(href) {
+    if (!document.querySelector('#ui-simplifier-active-1')) {
+        document.querySelector('#navigation > ul')
+        .insertAdjacentHTML(
+          'beforeend',
+          '<li class="MenuTitle" id="ui-simplifier-active-1"><a style="font-size: 0.8em;font-weight: normal;pointer-events: none;"><i>menus 🔒</i></a></li>'
+        );
+    }
     document.querySelectorAll('li > a[href="' + href + '"]').forEach(function(el) {
       // supprimer les <hr> consécutifs
       let sib = el.parentNode.nextElementSibling;
@@ -81,4 +114,21 @@ document.addEventListener('DOMContentLoaded', function() {
     if (a && li.children.length === 1) li.remove();
   });
 });
+
+
+
+
+
+/*
+
+
+if (!document.querySelector('#ui-simplifier-active')) {
+    document.querySelector('#navigation > ul').insertAdjacentHTML('beforeend',
+        '<li class=\"MenuTitle\" id=\"ui-simplifier-active\">' +
+        '<a style=\"font-size: 0.8em;font-weight: normal;pointer-events: none;\"><i>des éléments sont cachés</i></a>' +
+        '</li>'
+    );
+}*/
+
+
 </script>

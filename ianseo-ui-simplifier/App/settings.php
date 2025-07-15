@@ -216,13 +216,13 @@ function multi_get_text(string $key): string {
 }
 ?>
 <style>
-    /* layout 2 colonnes */
+    /* layout 2 colonnes *//*
     #sm_container {
         display:flex;
         gap:1em;
-    }
+    }*/
     
-    /* gauche */
+    /* gauche *//*
     #sm_left { flex:2; border: solid; border-color: #117;border-width: 1px; padding : 5px;margin:5px}
     #sm_left button{
         padding:6px;
@@ -240,7 +240,7 @@ function multi_get_text(string $key): string {
         display:flex;
         flex-direction:row;
         align-items:center;
-    }
+    }*/
     p{
         margin-top:0;
     }
@@ -250,14 +250,14 @@ function multi_get_text(string $key): string {
     #savedMsg{
         margin: 0 5%;padding:5px;text-align:center;font-weight:900;color:white; background-color:#117; opacity:1; transition:opacity 0.5s ease;
     }
-    /* droite */
+    /* droite *//*
     #sm_right { flex:3; border: solid; border-color: #117;border-width: 1px; padding : 5px;margin:5px}
     #sm_right h2{
         text-align:center;
     }
     #bloc_rapide {
         display:flex;align-items:center;justify-content: space-evenly;
-    }
+    }*//
     /* typographie */
   details > summary.lvl1 { font-size:1.2em; cursor:pointer; }
   .lvl2-item, details > summary.lvl2{  margin-left:20px;font-size:1.1em; cursor:pointer; }
@@ -284,175 +284,273 @@ function multi_get_text(string $key): string {
             });
         </script>
     <?php endif; ?>
-<div id="sm_container">
 
-  <!-- GAUCHE -->
-  <div id="sm_left">
-    
-    <h2><?= htmlspecialchars(multi_get_text('TVPresetChains'), ENT_QUOTES, 'UTF-8') ?></h2>
-    <div class="ligne">
-        <div class="colonne">
-        <button id="btnSimple"><?= htmlspecialchars(multi_get_text('Base'), ENT_QUOTES, 'UTF-8') ?></button>
-    
-        <b>Pour les novices :</b> limité à un tir de classement.
-        </div>
-        <div style="display:flex;align-items:center;border: solid; border-color: #117;border-width: 1px; padding : 5px;margin:5px 5px 5px 20px">
-            <form method="post" action="">
-                <input type="hidden" name="form_type" value="settings">
-                <div class="form-group">
-                    <label>
-                    <input
-                        type="checkbox"
-                        name="ultra_basique"
-                        value="1"
-                        <?= $ultraBasique ? 'checked' : '' ?>
-                        onchange="this.form.querySelector('button[type=submit]').click()"
-                    >
-                    mode tuto
-                    </label>
-                    <button type="submit" class="btn btn-primary" style="display:none;">save</button>
-                </form>
-            </div>
-        </div>    
-    </div>
-    <div class="ligne">
-        <p><i>C'est pas faux!🗡️</i></p>
-    </div>
-    <br><br>
-    <div class="ligne">
-        <div class="colonne">
-            <button id="btnAvance"><?= htmlspecialchars(multi_get_text('AdvancedMode'), ENT_QUOTES, 'UTF-8') ?></button>
-            <b>Pour les initiés :</b> matchs, téléphones, affichages en direct, accréditations/dossards, mode présentateur.
-        </div>
-    </div>
-    <div class="ligne">
-        <p><i>Un grand pouvoir implique de grandes responsabilités.🕷️</i></p>
-    </div>
-    <br><br>
-    <div class="ligne">
-        <div class="colonne">
-            <button id="btnExpert">Mode Expert</button>
-            <b>Pour les audacieux :</b> tout IANSEO sans limitation.
-        </div>
-    </div>
-    <div class="ligne">
-        <p><i>La route ? Là où on va, on n'a pas besoin de route...🛹</i></p>
-    </div>
-    <br><br>
-    <h3>À quoi sert ce module ?</h3>
-    <p>
-        Ce module vous permet de personnaliser quels menus apparaissent dans l’interface en fonction de vos besoins (simplifié, avancé, expert, ou personnalisé).
-    </p>
-    <p><i>
-        La sauvegarde se fait automatiquement après chaque modification dans un delais de 1,5s.
-    </i></p>
-    <p><i>
-        Attention, si plusieurs menus mènent au même lien dans ianseo. Il faut tous les décocher pour que ce soit sauvegardé.
-    </i></p>
-  </div>
 
-  <!-- DROITE -->
-<div id="sm_right">
-    <h2><?= multi_get_text('SetupManually') ?></h2>
-
-        <div id="bloc_rapide">
-            <button id="checkAll" class="Chck_all">☑️ <?= htmlspecialchars(multi_get_text('SelectAll'), ENT_QUOTES, 'UTF-8') ?> 🔒</button>
-            <button id="uncheckAll" class="Chck_all">🔲 <?= htmlspecialchars(multi_get_text('NoRowSelected'), ENT_QUOTES, 'UTF-8') ?> 👁️</button>
-        </div>
-    
-
-    <?php $idx1 = 0;?>
-    <form method="post" id="menuForm" target="hidden_iframe">
-        <!-- nouveau champ pour indiquer « formulaire de menus » -->
-        <input type="hidden" name="form_type" value="menu">
-
-        <iframe name="hidden_iframe" src="about:blank" style="display:none;"></iframe>
-        <button type="submit" style="display:none;">💾 <?= htmlspecialchars(multi_get_text('SettingsSaveConfig'), ENT_QUOTES, 'UTF-8') ?></button>
-        <?php foreach ($data as $lvl1 => $sub1): ?>
-            <?php $idx1++; ?>
-            <details id="menu1-<?= $idx1 ?>">
-            <summary class="lvl1">
-                <?= htmlspecialchars(multi_get_text($lvl1)) ?>
-                <!-- checkbox de toggle du menu principal -->
-                <span style="font-size:0.8em;">[ <input 
-                type="checkbox"
-                                name="hidden[]"
-                class="toggle-all"
-                data-target="menu1-<?= $idx1 ?>"
-                style="margin-left:auto;"
-                >Cacher/afficher tout le menu]</span>
-            </summary>
-
-            <?php
-                $idx2 = 0;
-                foreach ($sub1['children'] as $lvl2 => $info2):
-                $hasKids = !empty($info2['children']);
-                $url2    = $info2['url'] ?? '';
-                $path2   = '/'.ltrim($url2,'/');
-                $chk2    = $url2 && in_array($path2, $hidden) ? 'checked':''; 
-            ?>
-                <?php if ($hasKids): ?>
-                <?php $idx2++; ?>
-                <details id="menu2-<?= $idx1 ?>-<?= $idx2 ?>">
-                    <summary class="lvl2">
-                    <?php if ($url2): ?>
-                        <label>
-                        <input type="checkbox"
-                                name="hidden[]"
-                                value="<?= htmlspecialchars($path2, ENT_QUOTES) ?>"
-                                <?= $chk2 ?>>
-                        </label>
-                    <?php endif; ?>
-                    <?= htmlspecialchars(multi_get_text($lvl2)) ?>
-                    <!-- checkbox de toggle du sous-menu -->
-                    <span style="font-size:0.8em;">[ <input
-                        type="checkbox"
-                                name="hidden[]"
-                        class="toggle-all"
-                        data-target="menu2-<?= $idx1 ?>-<?= $idx2 ?>"
-                        style="margin-left:auto;"
-                    >Cacher/afficher tout le sous-menu]</span>
-                    
-                    </summary>
-
-                    <?php foreach ($info2['children'] as $lvl3 => $url3): ?>
-                    <?php $path3 = '/'.ltrim($url3,'/'); ?>
-                    <div class="lvl3">
-                        <label>
-                            
-                            <input type="checkbox" name="hidden[]"
-                                value="<?= htmlspecialchars($path3, ENT_QUOTES) ?>"
-                                <?= in_array($path3, $hidden)?'checked':'' ?>
-                            >
-                            <?= htmlspecialchars(multi_get_text($lvl3)) ?>
-                        </label>
-                    </div>
-                    <?php endforeach; ?>
-                </details>
-                <?php else: ?>
-                <div class="lvl2-item">
-                    <?php if ($url2): ?>
-                    <label>
+<table class="Tabella">
+    <tbody>
+        <tr>
+            <th>A venir 1
+            </th>
+            <th>A venir 2
+            </th>
+        </tr>
+        <tr>
+            <td>progression 1.5s + saved +uploaded
+            </td>
+            <td>Upload CSV perso + MaJ CSV + msg new version available
+            </td>
+        </tr>
+        <tr>
+            <!-- GAUCHE -->
+            <td style="width: 35%;vertical-align: top">
+                <table class="Tabella">
+                    <tbody>
+                        <tr>
+                            <th class="Title" colspan="3"><?= htmlspecialchars(multi_get_text('TVPresetChains'), ENT_QUOTES, 'UTF-8') ?></th>
+                        </tr>
+                        <tr>
+                            <th>
+                                <button id="btnSimple" style="background: limegreen !important; animation: blink 1.5s linear infinite;"><?= htmlspecialchars(multi_get_text('Base'), ENT_QUOTES, 'UTF-8') ?></button>
+                            </th>
+                            <td>
+                                <table  style="width: 100%">
+                                    <tbody>
+                                        <tr>
+                                            <th style="width: 100%">
+                                                <b>Pour les novices</b>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Limité à un tir de classement.
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p><i>C'est pas faux!🗡️</i></p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td style="vertical-align: top;text-align: center;">
+                                <table  style="width: 100%">
+                                    <tbody>
+                                        <tr>
+                                            <th style="width: 100%">
+                                                            mode tuto
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <form method="post" action="">
+                                                    <input type="hidden" name="form_type" value="settings">
+                                                    <div class="form-group">
+                                                        <label style="background: limegreen !important; animation: blink 1.5s linear infinite;">
+                                                            <input
+                                                                type="checkbox"
+                                                                name="ultra_basique"
+                                                                value="1"
+                                                                <?= $ultraBasique ? 'checked' : '' ?>
+                                                                onchange="this.form.querySelector('button[type=submit]').click()"
+                                                            >
+                                                        </label>
+                                                        <button type="submit" class="btn btn-primary" style="display:none;">save</button>
+                                                    </div>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                    
+                                    
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <button id="btnAvance"><?= htmlspecialchars(multi_get_text('AdvancedMode'), ENT_QUOTES, 'UTF-8') ?></button>
+                            </th>
+                            <td  colspan="2">
+                                <table  style="width: 100%">
+                                    <tbody>
+                                        <tr>
+                                            <th style="width: 100%">
+                                                <b>Pour les initiés</b>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Matchs, téléphones, affichages en direct, accréditations/dossards, mode présentateur.
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p><i>Un grand pouvoir implique de grandes responsabilités.🕷️</i></p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <button id="btnExpert">Mode Expert</button>
+                            </th>
+                            <td  colspan="2">
+                                <table  style="width: 100%">
+                                    <tbody>
+                                        <tr>
+                                            <th style="width: 100%">
+                                                <b>Pour les audacieux</b>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                Tout IANSEO, sans limitation.
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <p><i>La route ? Là où on va, on n'a pas besoin de route...🛹</i></p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <h3>À quoi sert ce module ?</h3>
+                                <p>
+                                    Ce module vous permet de personnaliser l'affichage des menus dans l’interface en fonction de vos besoins (simplifié, avancé, expert, ou personnalisé).
+                                </p>
+                                <p><i>
+                                    La sauvegarde se fait automatiquement après chaque modification dans un delais de 1,5s.
+                                </i></p>
+                                <p><i>
+                                    Attention, si plusieurs menus mènent au même lien dans ianseo (ex: les impressions). Il faut tous les décocher pour que ce soit sauvegardé.
+                                </i></p>
+                            </td>
+                        </tr>
                         
-                        <input type="checkbox" name="hidden[]"
-                            value="<?= htmlspecialchars($path2, ENT_QUOTES) ?>"
-                            <?= $chk2 ?> >
-                        <?= htmlspecialchars(multi_get_text($lvl2)) ?>
-                    </label>
-                    <?php else: ?>
-                    <?= htmlspecialchars(multi_get_text($lvl2)) ?>
-                    <?php endif; ?>
-                </div>
-                <?php endif; ?>
-            <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </td>
+            <!-- DROITE -->
+            <td style="width: 65%;vertical-align: top">
+                <table class="Tabella">
+                    <tbody>
+                        <tr>
+                            <th class="Title" colspan="2">
+                                <?= multi_get_text('SetupManually') ?>
+                            </th>
+                        </th>
+                        <tr>
+                            <td style="text-align:center;justify-content: space-evenly">
+                                    <button id="checkAll" class="Chck_all">☑️ <?= htmlspecialchars(multi_get_text('SelectAll'), ENT_QUOTES, 'UTF-8') ?> 🔒</button>
+                                    <button id="uncheckAll" class="Chck_all">🔲 <?= htmlspecialchars(multi_get_text('NoRowSelected'), ENT_QUOTES, 'UTF-8') ?> 👁️</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <?php $idx1 = 0;?>
+                                <form method="post" id="menuForm" target="hidden_iframe">
+                                    <!-- nouveau champ pour indiquer « formulaire de menus » -->
+                                    <input type="hidden" name="form_type" value="menu">
 
-            </details>
-        <?php endforeach; ?>
-    
-    </form>
-</div>
+                                    <iframe name="hidden_iframe" src="about:blank" style="display:none;"></iframe>
+                                    <button type="submit" style="display:none;">💾 <?= htmlspecialchars(multi_get_text('SettingsSaveConfig'), ENT_QUOTES, 'UTF-8') ?></button>
+                                    <?php foreach ($data as $lvl1 => $sub1): ?>
+                                        <?php $idx1++; ?>
+                                        <details id="menu1-<?= $idx1 ?>">
+                                        <summary class="lvl1">
+                                            <?= htmlspecialchars(multi_get_text($lvl1)) ?>
+                                            <!-- checkbox de toggle du menu principal -->
+                                            <span style="font-size:0.8em;">[ <input 
+                                            type="checkbox"
+                                                            name="hidden[]"
+                                            class="toggle-all"
+                                            data-target="menu1-<?= $idx1 ?>"
+                                            style="margin-left:auto;"
+                                            >Cacher/afficher tout]</span>
+                                        </summary>
 
-</div>
+                                        <?php
+                                            $idx2 = 0;
+                                            foreach ($sub1['children'] as $lvl2 => $info2):
+                                            $hasKids = !empty($info2['children']);
+                                            $url2    = $info2['url'] ?? '';
+                                            $path2   = '/'.ltrim($url2,'/');
+                                            $chk2    = $url2 && in_array($path2, $hidden) ? 'checked':''; 
+                                        ?>
+                                            <?php if ($hasKids): ?>
+                                            <?php $idx2++; ?>
+                                            <details id="menu2-<?= $idx1 ?>-<?= $idx2 ?>">
+                                                <summary class="lvl2">
+                                                <?php if ($url2): ?>
+                                                    <label>
+                                                    <input type="checkbox"
+                                                            name="hidden[]"
+                                                            value="<?= htmlspecialchars($path2, ENT_QUOTES) ?>"
+                                                            <?= $chk2 ?>>
+                                                    </label>
+                                                <?php endif; ?>
+                                                <?= htmlspecialchars(multi_get_text($lvl2)) ?>
+                                                <!-- checkbox de toggle du sous-menu -->
+                                                <span style="font-size:0.8em;">[ <input
+                                                    type="checkbox"
+                                                            name="hidden[]"
+                                                    class="toggle-all"
+                                                    data-target="menu2-<?= $idx1 ?>-<?= $idx2 ?>"
+                                                    style="margin-left:auto;"
+                                                >Cacher/afficher tout le sous-menu]</span>
+                                                
+                                                </summary>
+
+                                                <?php foreach ($info2['children'] as $lvl3 => $url3): ?>
+                                                <?php $path3 = '/'.ltrim($url3,'/'); ?>
+                                                <div class="lvl3">
+                                                    <label>
+                                                        
+                                                        <input type="checkbox" name="hidden[]"
+                                                            value="<?= htmlspecialchars($path3, ENT_QUOTES) ?>"
+                                                            <?= in_array($path3, $hidden)?'checked':'' ?>
+                                                        >
+                                                        <?= htmlspecialchars(multi_get_text($lvl3)) ?>
+                                                    </label>
+                                                </div>
+                                                <?php endforeach; ?>
+                                            </details>
+                                            <?php else: ?>
+                                            <div class="lvl2-item">
+                                                <?php if ($url2): ?>
+                                                <label>
+                                                    
+                                                    <input type="checkbox" name="hidden[]"
+                                                        value="<?= htmlspecialchars($path2, ENT_QUOTES) ?>"
+                                                        <?= $chk2 ?> >
+                                                    <?= htmlspecialchars(multi_get_text($lvl2)) ?>
+                                                </label>
+                                                <?php else: ?>
+                                                <?= htmlspecialchars(multi_get_text($lvl2)) ?>
+                                                <?php endif; ?>
+                                            </div>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+
+                                        </details>
+                                    <?php endforeach; ?>
+                                
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
 <script>
   // Liste des URL cochées pour chaque preset
   const presetSimple = <?= json_encode(array_values(array_unique($presetSimple)), JSON_HEX_TAG) ?>;
