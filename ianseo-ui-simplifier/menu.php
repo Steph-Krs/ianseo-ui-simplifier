@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('#navigation > ul')
         .insertAdjacentHTML(
           'beforeend',
-          '<li class="MenuTitle" id="ui-simplifier-active-1"><a style="font-size: 0.8em;font-weight: normal;pointer-events: none;"><i>menus 🔒</i></a></li>'
+          '<li class="MenuTitle" id="ui-simplifier-active-1"><a style="font-size: 0.8em;font-weight: normal;pointer-events: none;"><i>Menus 🔒</i></a></li>'
         );
     }
     document.querySelectorAll('li > a[href="' + href + '"]').forEach(function(el) {
