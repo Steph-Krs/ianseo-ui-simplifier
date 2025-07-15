@@ -342,18 +342,18 @@ function multi_get_text(string $key): string {
         <tr>
             <th>Status
             </th>
+            <th>MaJ des préconfigurations
+            </th>
+        </tr>
+        <tr>
+            <td id="ProgressBar">
+            </td>
             <td id="update">
                 <form method="post">
                     <button type="submit" name="update_module">
                     🔄 Mettre à jour le module
                     </button>
                 </form>
-            </td>
-        </tr>
-        <tr>
-            <td id="ProgressBar">
-            </td>
-            <td id="update">
             </td>
         </tr>
         <tr>
