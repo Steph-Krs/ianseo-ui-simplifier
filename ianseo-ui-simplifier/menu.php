@@ -13,7 +13,7 @@ $host     = $_SERVER['HTTP_HOST'];
 $baseUrl  = "{$scheme}://{$host}";
 
 // 3. Monte l’URL finale vers App/settings.php
-$ret['MODS']['ui-simplifier'] = 'UI Simplifier 👁️🔒|' 
+$ret['MODS']['ui-simplifier'] = 'Affichages 🔒|' 
     . $baseUrl 
     . $relativePath 
     . '/App/settings.php';
