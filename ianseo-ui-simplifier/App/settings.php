@@ -36,6 +36,82 @@ $hidden = []; // sera géré en JS via localStorage
 require_once dirname(__FILE__, 5) . '/config.php';
 include 'Common/Templates/head.php';
 
+if (isset($_POST['update_module'])) {
+    $res = updateUIsimplifierModule();
+    echo '<div style="margin:1em 0; padding:0.5em; background:#eef; border:1px solid #99c;">'
+       . htmlspecialchars($res)
+       . '</div>';
+}
+/**
+ * Télécharge, extrait et remplace le dossier du module.
+ * @return string Message de succès ou d’erreur.
+ */
+function updateUIsimplifierModule() {
+    $zipUrl     = 'https://github.com/Steph-Krs/ianseo-ui-simplifier/archive/refs/heads/main.zip';
+    $tmpZip     = sys_get_temp_dir().'/ianseo-ui-simplifier.zip';
+    $tmpExtract = sys_get_temp_dir().'/ianseo-ui-simplifier';
+
+    // 1. Télécharger le ZIP
+    if (false === file_put_contents($tmpZip, fopen($zipUrl, 'r'))) {
+        return '❌ Échec du téléchargement du ZIP.';
+    }
+
+    // 2. Ouvrir et extraire
+    $zip = new ZipArchive();
+    if ($zip->open($tmpZip) !== true) {
+        return '❌ Impossible d’ouvrir l’archive ZIP.';
+    }
+    // vider l’ancien extrait s’il existe
+    if (is_dir($tmpExtract)) {
+        rrmdir($tmpExtract);
+    }
+    $zip->extractTo($tmpExtract);
+    $zip->close();
+
+    // 3. Copier les fichiers
+    $srcDir = $tmpExtract . '/ianseo-ui-simplifier-main'; // nom du dossier dans le ZIP
+    $dstDir = dirname(__DIR__,2);
+
+    if (!is_dir($srcDir)) {
+        return '❌ Structure ZIP inattendue (pas de dossier ianseo-ui-simplifier-main).';
+    }
+    recurse_copy($srcDir, $dstDir);
+
+    // 4. Nettoyer
+    unlink($tmpZip);
+    rrmdir($tmpExtract);
+
+    return '✅ Module à jour ! N’oublie pas de recharger la page si nécessaire.';
+}
+
+/** Recopie récursive de $src vers $dst (écrase tout). */
+function recurse_copy(string $src, string $dst) {
+    $dir = opendir($src);
+    @mkdir($dst, 0755, true);
+    while (false !== ($file = readdir($dir))) {
+        if ($file === '.' || $file === '..') continue;
+        $srcPath = "$src/$file";
+        $dstPath = "$dst/$file";
+        if (is_dir($srcPath)) {
+            recurse_copy($srcPath, $dstPath);
+        } else {
+            copy($srcPath, $dstPath);
+        }
+    }
+    closedir($dir);
+}
+
+/** Supprime un dossier et tout son contenu. */
+function rrmdir(string $dir) {
+    if (!is_dir($dir)) return;
+    $objects = scandir($dir);
+    foreach ($objects as $obj) {
+        if ($obj === '.' || $obj === '..') continue;
+        $path = "$dir/$obj";
+        is_dir($path) ? rrmdir($path) : unlink($path);
+    }
+    rmdir($dir);
+}
 
 
 // 3) Lecture CSV
