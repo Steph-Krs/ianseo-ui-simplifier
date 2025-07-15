@@ -115,7 +115,7 @@ function rrmdir(string $dir) {
 
 
 // 3) Lecture CSV
-$csvFile = 'correspondance.csv';
+$csvFile = 'menus.csv';
 $lines = array_map(fn($l)=>str_getcsv($l, ';'), file($csvFile, FILE_SKIP_EMPTY_LINES));
 array_shift($lines);
 
@@ -332,6 +332,10 @@ function multi_get_text(string $key): string {
 .hidden {
   opacity: 0;
 }
+.clignotant{
+    background: limegreen !important;
+    animation: blink 1.5s linear infinite;
+}
 
 
 </style>
@@ -349,8 +353,8 @@ function multi_get_text(string $key): string {
             <td id="ProgressBar">
             </td>
             <td id="update">
-                <form method="post">
-                    <button type="submit" name="update_module">
+                <form method="post" style="text-align:center;">
+                    <button type="submit" name="update_module" class="clignotant">
                     🔄 Mettre à jour le module et les pré-configurations par défaut
                     </button>
                 </form>
@@ -359,13 +363,57 @@ function multi_get_text(string $key): string {
         <tr>
             <td id="saved" style="text-align:center;">
             </td>
-            <td>msg new version available
-            </td>
-        </tr>
-        <tr>
-            <td>uploaded
-            </td>
-            <td>Upload CSV perso
+            <td id="updateCSV" style="text-align:center;">
+                <?php
+                // Affichage du formulaire
+                echo '
+                    <form method="post" enctype="multipart/form-data">
+                    <label for="csv_file">Importer un CSV (menus.csv ou elements.csv) :</label><br>
+                    <input type="file" name="csv_file" id="csv_file" accept=".csv" required>
+                    <button type="submit" name="upload_csv">Importer</button>
+                    </form>
+                ';
+
+                // Traitement de l’upload
+                if (isset($_POST['upload_csv'])) {
+                    if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
+                        echo '<p style="color:red;">❌ Aucun fichier reçu ou erreur d’upload.</p>';
+                    } else {
+                        $tmp   = $_FILES['csv_file']['tmp_name'];
+                        $name  = basename(strtolower($_FILES['csv_file']['name']));
+                        $allowed = ['menus.csv', 'elements.csv'];
+
+                        // Vérification du nom
+                        if (!in_array($name, $allowed, true)) {
+                            echo '<p style="color:red;">❌ Nom de fichier invalide, attendez menus.csv ou elements.csv.</p>';
+                        } else {
+                            // Déterminer le nombre minimal de colonnes
+                            $minCols = $name === 'menus.csv' ? 6 : 4;
+
+                            // Ouvrir et lire la première ligne
+                            if (($h = fopen($tmp, 'r')) !== false) {
+                                $cols = fgetcsv($h, 0, ';');
+                                fclose($h);
+                                $count = is_array($cols) ? count($cols) : 0;
+                            } else {
+                                $count = 0;
+                            }
+
+                            if ($count < $minCols) {
+                                echo "<p style=\"color:red;\">❌ CSV invalide : trouvé {$count} colonnes, {$minCols} minimum requis.</p>";
+                            } else {
+                                // Chemin de destination
+                                $dst = __DIR__ . '/' . $name;
+                                if (move_uploaded_file($tmp, $dst)) {
+                                    echo '<p style="color:green;">✅ Fichier '.htmlspecialchars($name).' importé avec succès.</p>';
+                                } else {
+                                    echo '<p style="color:red;">❌ Impossible de déplacer le fichier vers '.$dst.'</p>';
+                                }
+                            }
+                        }
+                    }
+                }
+                ?>
             </td>
         </tr>
         <tr>
@@ -378,7 +426,7 @@ function multi_get_text(string $key): string {
                         </tr>
                         <tr>
                             <th>
-                                <button id="btnSimple" style="background: limegreen !important; animation: blink 1.5s linear infinite;"><?= htmlspecialchars(multi_get_text('Base'), ENT_QUOTES, 'UTF-8') ?></button>
+                                <button id="btnSimple" class="clignotant"><?= htmlspecialchars(multi_get_text('Base'), ENT_QUOTES, 'UTF-8') ?></button>
                             </th>
                             <td>
                                 <table  style="width: 100%">
@@ -414,7 +462,7 @@ function multi_get_text(string $key): string {
                                                 <form method="post" action="">
                                                     <input type="hidden" name="form_type" value="settings">
                                                     <div class="form-group">
-                                                        <label style="background: limegreen !important; animation: blink 1.5s linear infinite;">
+                                                        <label class="clignotant">
                                                             <input
                                                                 type="checkbox"
                                                                 name="ultra_basique"
