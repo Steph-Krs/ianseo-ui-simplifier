@@ -1,22 +1,39 @@
 <?php
 
-// 1. Calcule le chemin relatif au répertoire web (DOCUMENT_ROOT)
-$relativePath = str_replace(
-    realpath($_SERVER['DOCUMENT_ROOT']),
-    '',
-    realpath(__DIR__)
+global $CFG;
+
+// 1) Chemin absolu vers le dossier de settings.php
+$fullDir = realpath(__DIR__);
+
+// 2) On fragmente après “Modules/Custom/”
+$parts = preg_split(
+    '#'.preg_quote(DIRECTORY_SEPARATOR.'Modules'.DIRECTORY_SEPARATOR.'Custom'.DIRECTORY_SEPARATOR, '#').'#',
+    $fullDir,
+    2
 );
 
-// 2. Construit le schéma (http ou https) + host
-$scheme   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host     = $_SERVER['HTTP_HOST'];
-$baseUrl  = "{$scheme}://{$host}";
+// 3) Reconstruit la partie “ianseo-ui-simplifier-main/ianseo-ui-simplifier/App”
+if (count($parts) === 2) {
+    $modulePath = str_replace(DIRECTORY_SEPARATOR, '/', rtrim($parts[1], '/'));
+} else {
+    $modulePath = '';
+}
 
-// 3. Monte l’URL finale vers App/settings.php
-$ret['MODS']['ui-simplifier'] = 'Affichages 🔒|' 
-    . $baseUrl 
-    . $relativePath 
-    . '/App/settings.php';
+// 4) Monte l’URL complète *avec* le slash manquant
+$scheme  = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host    = $_SERVER['HTTP_HOST'];
+$rootDir = rtrim($CFG->ROOT_DIR, '/').'/';
+
+$url = sprintf(
+    '%s://%s%sModules/Custom/%s/App/settings.php',
+    $scheme,
+    $host,
+    $rootDir,
+    $modulePath
+);
+
+// 5) Injection dans le menu
+$ret['MODS']['ui-simplifier'] = 'Affichages 🔒|'.$url;
 
 
 // on suppose que session_start() est déjà fait dans config.php
