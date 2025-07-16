@@ -344,79 +344,6 @@ function multi_get_text(string $key): string {
 <table class="Tabella">
     <tbody>
         <tr>
-            <th>Status
-            </th>
-            <th>MaJ des préconfigurations
-            </th>
-        </tr>
-        <tr>
-            <td id="ProgressBar">
-            </td>
-            <td id="update">
-                <form method="post" style="text-align:center;">
-                    <button type="submit" name="update_module" class="clignotant">
-                    🔄 Mettre à jour le module et les pré-configurations par défaut
-                    </button>
-                </form>
-            </td>
-        </tr>
-        <tr>
-            <td id="saved" style="text-align:center;">
-            </td>
-            <td id="updateCSV" style="text-align:center;">
-                <?php
-                // Affichage du formulaire
-                echo '
-                    <form method="post" enctype="multipart/form-data">
-                    <label for="csv_file">Importer un CSV (menus.csv ou elements.csv) :</label><br>
-                    <input type="file" name="csv_file" id="csv_file" accept=".csv" required>
-                    <button type="submit" name="upload_csv">Importer</button>
-                    </form>
-                ';
-
-                // Traitement de l’upload
-                if (isset($_POST['upload_csv'])) {
-                    if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
-                        echo '<p style="color:red;">❌ Aucun fichier reçu ou erreur d’upload.</p>';
-                    } else {
-                        $tmp   = $_FILES['csv_file']['tmp_name'];
-                        $name  = basename(strtolower($_FILES['csv_file']['name']));
-                        $allowed = ['menus.csv', 'elements.csv'];
-
-                        // Vérification du nom
-                        if (!in_array($name, $allowed, true)) {
-                            echo '<p style="color:red;">❌ Nom de fichier invalide, attendez menus.csv ou elements.csv.</p>';
-                        } else {
-                            // Déterminer le nombre minimal de colonnes
-                            $minCols = $name === 'menus.csv' ? 6 : 4;
-
-                            // Ouvrir et lire la première ligne
-                            if (($h = fopen($tmp, 'r')) !== false) {
-                                $cols = fgetcsv($h, 0, ';');
-                                fclose($h);
-                                $count = is_array($cols) ? count($cols) : 0;
-                            } else {
-                                $count = 0;
-                            }
-
-                            if ($count < $minCols) {
-                                echo "<p style=\"color:red;\">❌ CSV invalide : trouvé {$count} colonnes, {$minCols} minimum requis.</p>";
-                            } else {
-                                // Chemin de destination
-                                $dst = __DIR__ . '/' . $name;
-                                if (move_uploaded_file($tmp, $dst)) {
-                                    echo '<p style="color:green;">✅ Fichier '.htmlspecialchars($name).' importé avec succès.</p>';
-                                } else {
-                                    echo '<p style="color:red;">❌ Impossible de déplacer le fichier vers '.$dst.'</p>';
-                                }
-                            }
-                        }
-                    }
-                }
-                ?>
-            </td>
-        </tr>
-        <tr>
             <!-- GAUCHE -->
             <td style="width: 35%;vertical-align: top">
                 <table class="Tabella">
@@ -535,17 +462,190 @@ function multi_get_text(string $key): string {
                             </td>
                         </tr>
                         <tr>
+                            <td id="ProgressBar" colspan="3">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td id="saved" style="text-align:center;" colspan='3'>
+                            </td>
+                        </tr>
+                        <tr>
                             <td colspan="3">
                                 <h3>À quoi sert ce module ?</h3>
                                 <p>
                                     Ce module vous permet de personnaliser l'affichage des menus dans l’interface en fonction de vos besoins (simplifié, avancé, expert, ou personnalisé).
                                 </p>
-                                <p><i>
-                                    La sauvegarde se fait automatiquement après chaque modification dans un delais de 1,5s.
-                                </i></p>
-                                <p><i>
-                                    Attention, si plusieurs menus mènent au même lien dans ianseo (ex: les impressions). Il faut tous les décocher pour que ce soit sauvegardé.
-                                </i></p>
+                                <p>
+                                    Le "mode tuto" permet de cacher les éléments non nécessaires et mettre en évidence certains éléments.
+                                </p>
+                            </td>
+                        </tr>
+                        <tr class="Divider" style="height:5px;">
+                            <td  colspan="3">
+                            </td>
+                        </tr>
+                        <tr>
+                            <th colspan="3">MaJ du module
+                            </th>
+                        </tr>
+                        <tr>
+                            <td id="update"  colspan="3">
+                                <form method="post" style="text-align:center;">
+                                    <button type="submit" name="update_module" class="clignotant">
+                                    🔄 Mettre à jour le module et les pré-configurations par défaut
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr>
+                            
+                            <td id="updateCSV" style="text-align:center;"  colspan="3">
+                                <?php
+                                // Affichage du formulaire
+                                echo '
+                                    <form method="post" enctype="multipart/form-data">
+                                    <label for="csv_file">Importer un CSV perso (menus.csv ou elements.csv) :</label><br>
+                                    <input type="file" name="csv_file" id="csv_file" accept=".csv" required>
+                                    <button type="submit" name="upload_csv">Importer</button>
+                                    </form>
+                                ';
+
+                                // Traitement de l’upload
+                                if (isset($_POST['upload_csv'])) {
+                                    if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
+                                        echo '<p style="color:red;">❌ Aucun fichier reçu ou erreur d’upload.</p>';
+                                    } else {
+                                        $tmp   = $_FILES['csv_file']['tmp_name'];
+                                        $name  = basename(strtolower($_FILES['csv_file']['name']));
+                                        $allowed = ['menus.csv', 'elements.csv'];
+
+                                        // Vérification du nom
+                                        if (!in_array($name, $allowed, true)) {
+                                            echo '<p style="color:red;">❌ Nom de fichier invalide, attendez menus.csv ou elements.csv.</p>';
+                                        } else {
+                                            // Déterminer le nombre minimal de colonnes
+                                            $minCols = $name === 'menus.csv' ? 6 : 4;
+
+                                            // Ouvrir et lire la première ligne
+                                            if (($h = fopen($tmp, 'r')) !== false) {
+                                                $cols = fgetcsv($h, 0, ';');
+                                                fclose($h);
+                                                $count = is_array($cols) ? count($cols) : 0;
+                                            } else {
+                                                $count = 0;
+                                            }
+
+                                            if ($count < $minCols) {
+                                                echo "<p style=\"color:red;\">❌ CSV invalide : trouvé {$count} colonnes, {$minCols} minimum requis.</p>";
+                                            } else {
+                                                // Chemin de destination
+                                                $dst = __DIR__ . '/' . $name;
+                                                if (move_uploaded_file($tmp, $dst)) {
+                                                    echo '<p style="color:green;">✅ Fichier '.htmlspecialchars($name).' importé avec succès.</p>';
+                                                } else {
+                                                    echo '<p style="color:red;">❌ Impossible de déplacer le fichier vers '.$dst.'</p>';
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                ?>
+                            </td>
+                        </tr>
+                        <tr class="Divider" style="height:5px;">
+                            <td colspan="3">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <table class="Tabella">
+                                    <tbody>
+                                        <tr>
+                                            <th id="download-menus" style="cursor:pointer;">
+                                                menus.csv
+                                            </th>
+                                            <td>
+                                                <table class="Tabella">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td style="font-size:0.7em; text-align:center;">
+                                                                Name Level1
+                                                            </td>
+                                                            <td style="font-size:0.7em; text-align:center;">
+                                                                Name Level2
+                                                            </td>
+                                                            <td style="font-size:0.7em; text-align:center;">
+                                                                Name Level3
+                                                            </td>
+                                                            <td style="font-size:0.7em; text-align:center;">
+                                                                URL
+                                                            </td>
+                                                            <td style="font-size:0.7em; text-align:center;">
+                                                                Base
+                                                            </td>
+                                                            <td style="font-size:0.7em; text-align:center;">
+                                                                Advanced
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="font-size:0.7em; text-align:center;" colspan="3">
+                                                                from ianseo Common/Menu.php;
+                                                            </td>
+                                                            <td style="font-size:0.7em; text-align:center;">
+                                                                menu's link;
+                                                            </td>
+                                                            <td style="font-size:0.7em; text-align:center;" colspan="2">
+                                                                X or nothing;
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        <tr>
+                                    </tbody>
+                                </table>
+                                <table class="Tabella">
+                                    <tbody>
+                                        <tr>
+                                            <th id="download-elements" style="cursor:pointer;">
+                                                elements.csv
+                                            </th>
+                                            <td>
+                                                <table class="Tabella">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td style="font-size:0.7em; text-align:center;">
+                                                                Path
+                                                            </td>
+                                                            <td style="font-size:0.7em; text-align:center;">
+                                                                querySelector
+                                                            </td>
+                                                            <td style="font-size:0.7em; text-align:center;">
+                                                                Delete
+                                                            </td>
+                                                            <td style="font-size:0.7em; text-align:center;">
+                                                                Mark
+                                                            </td>
+                                                            <td style="font-size:0.7em; text-align:center;">
+                                                                Comment
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td style="font-size:0.7em; text-align:center;" colspan="2">
+                                                            </td>
+                                                            <td style="font-size:0.7em; text-align:center;" colspan="2">
+                                                                X or nothing;
+                                                            </td>
+                                                            <td style="font-size:0.7em; text-align:center;">
+                                                                not used
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        <tr>
+                                    </tbody>
+                                </table>
                             </td>
                         </tr>
                         
@@ -660,6 +760,19 @@ function multi_get_text(string $key): string {
                                 </form>
                             </td>
                         </tr>
+                        <tr class="Divider" style="height:20px;">
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <p><i>
+                                    La sauvegarde se fait automatiquement après chaque modification dans un delais de 1,5s.
+                                </i></p>
+                                <p><i>
+                                    Attention, si plusieurs menus mènent au même lien dans ianseo (ex: les impressions). Il faut tous les décocher pour que ce soit sauvegardé.
+                                </i></p>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </td>
@@ -668,6 +781,16 @@ function multi_get_text(string $key): string {
 </table>
 
 <script>
+
+  document.getElementById('download-menus').addEventListener('click', function() {
+    // Remplace le chemin si besoin selon où est ton settings.php
+    window.location.href = 'download_csv.php?file=menus.csv';
+  });
+  document.getElementById('download-elements').addEventListener('click', function() {
+    // Remplace le chemin si besoin selon où est ton settings.php
+    window.location.href = 'download_csv.php?file=elements.csv';
+  });
+
   // Liste des URL cochées pour chaque preset
   const presetSimple = <?= json_encode(array_values(array_unique($presetSimple)), JSON_HEX_TAG) ?>;
   //console.log("presetSimple = ",presetSimple);
