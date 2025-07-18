@@ -1,6 +1,6 @@
 <?php
 /**
- * Generate CSS for Ultra Basic mode based on rules defined in elements.csv.
+ * Generate CSS for Ultra Basic mode based on rules defined in elements.csv
  *
  * @return string Generated CSS rules
  */

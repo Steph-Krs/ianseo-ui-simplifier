@@ -4,7 +4,7 @@
 // Allowed CSV files for download
 $allowedFiles = ['menus.csv', 'elements.csv'];
 
-// Retrieve and sanitize the “file” query parameter
+// Retrieve and sanitize the “file” query parameter 
 $requestedFile = basename($_GET['file'] ?? '');
 if (!in_array($requestedFile, $allowedFiles, true)) {
     http_response_code(400);

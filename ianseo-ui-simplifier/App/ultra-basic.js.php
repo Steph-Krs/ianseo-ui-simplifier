@@ -2,7 +2,7 @@
 /**
  * getUltraBasicJS.php
  *
- * Returns the JS indicator string for Ultra Basic mode based on CSV rules in elements.csv.
+ * Returns the JS indicator string for Ultra Basic mode based on CSV rules in elements.csv
  *
  * PHP version 7.4+
  *
