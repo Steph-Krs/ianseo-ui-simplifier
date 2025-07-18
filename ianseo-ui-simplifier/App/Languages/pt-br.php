@@ -1,13 +1,13 @@
 <?php
-// App/Languages/pt.php
+// App/Languages/pt_BR.php
 $lang['UIS-View']               = 'Visualizar';
 $lang['UIS-BaseUser']           = 'Para Iniciantes';
-$lang['UIS-BaseLimits']         = 'Limitado a rondas de qualificação.';
+$lang['UIS-BaseLimits']         = 'Limitado às rodadas de classificação.';
 $lang['UIS-BaseQuote']          ="“Clear as mud!”";
 $lang['UIS-BaseQuoteFrom']      ="unknown";
 $lang['UIS-TutoMode']           = 'Modo Tutorial';
 $lang['UIS-AdvencedUser']       = 'Para Usuários Avançados';
-$lang['UIS-AdvencedLimits']     = 'Partidas, telefones, exibições ao vivo, acreditações/números, modo apresentador.';
+$lang['UIS-AdvencedLimits']     = 'Partidas, telefones, exibições ao vivo, credenciamentos/números, modo apresentador.';
 $lang['UIS-AdvancedQuote']      ='“With great power comes great responsibility.”';
 $lang['UIS-AdvancedQuoteFrom']  ='Uncle Ben';
 $lang['UIS-ExpertUser']         = 'Para os Corajosos';

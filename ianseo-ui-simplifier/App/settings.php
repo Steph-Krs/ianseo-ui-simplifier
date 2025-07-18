@@ -336,7 +336,7 @@ function multiGetText(string $key): string
     }
 
     // 5) Nothing found: return the raw key
-    return $key;
+    return get_text($key);
 }
 ?>
 <style>

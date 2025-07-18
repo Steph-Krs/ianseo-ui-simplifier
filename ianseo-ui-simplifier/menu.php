@@ -13,9 +13,19 @@ $relative = preg_replace('#^.*?/Modules/Custom/#', '', $current);
 // 4) Assemble URL to App/settings.php
 $settingsUrl = "{$scheme}://{$host}{$root}Modules/Custom/" . ltrim($relative, '/') . "/App/settings.php";
 
-// 5) Inject into the menu config
-$View = "Affichage";
-$ret['MODS']['uiSimplifier'] = "{$View} 🔒|{$settingsUrl}";
+// 5) Add the menu in the corresponding language
+$lang = [];
+$langFile = __DIR__.'/App/Languages/'.(
+    $GLOBALS['CFG']->lang
+    ?? (preg_match(
+          '/\[\[[^\]]+\]@\[(?<l>[a-z]{2})\]@/i',
+          strip_tags(get_text('UIS-View')),
+          $m
+       ) ? strtolower($m['l']) : 'en')
+).'.php';
+is_readable($langFile) && include $langFile;
+$label = $lang['UIS-View'] ?? 'View';
+$ret['MODS']['uiSimplifier'] = "$label 🔒|$settingsUrl";
 
 // -------------------------------------------------
 // Ultra Basic mode: read flag from cookie
