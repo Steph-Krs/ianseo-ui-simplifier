@@ -1,28 +1,27 @@
 <?php
-// download_csv.php
-// Ne pas mettre d’espace avant, ni echo
+// No output before headers
 
-// Liste des fichiers autorisés
-$allowed = ['menus.csv', 'elements.csv'];
+// Allowed CSV files for download
+$allowedFiles = ['menus.csv', 'elements.csv'];
 
-// Récupère le paramètre ?file=
-$file = isset($_GET['file']) ? basename($_GET['file']) : '';
-if (!in_array($file, $allowed, true)) {
+// Retrieve and sanitize the “file” query parameter
+$requestedFile = basename($_GET['file'] ?? '');
+if (!in_array($requestedFile, $allowedFiles, true)) {
     http_response_code(400);
-    exit('Fichier non autorisé.');
+    exit('File not allowed.');
 }
 
-$path = __DIR__ . '/' . $file;
-if (!file_exists($path)) {
-    
+$filePath = __DIR__ . '/' . $requestedFile;
+if (!file_exists($filePath)) {
     http_response_code(404);
-    exit('Fichier introuvable.');
+    exit('File not found.');
 }
 
-// Envoie les bons headers pour forcer le téléchargement
+// Send headers to prompt download
 header('Content-Type: text/csv; charset=utf-8');
-header('Content-Disposition: attachment; filename="' . $file . '"');
-header('Content-Length: ' . filesize($path));
-readfile($path);
+header('Content-Disposition: attachment; filename="' . $requestedFile . '"');
+header('Content-Length: ' . (string) filesize($filePath));
+
+readfile($filePath);
 exit;
 ?>

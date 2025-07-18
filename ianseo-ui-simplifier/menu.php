@@ -1,151 +1,101 @@
 <?php
+// 1) Determine URL scheme (http vs. https)
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
 
-global $CFG;
+// 2) Build host and app root path
+$host = $_SERVER['HTTP_HOST'];
+$root = rtrim($GLOBALS['CFG']->ROOT_DIR, '/') . '/';
 
-// 1) Chemin absolu vers le dossier de settings.php
-$fullDir = realpath(__DIR__);
+// 3) Compute this module’s path under Modules/Custom
+$current = str_replace('\\', '/', __DIR__);
+$relative = preg_replace('#^.*?/Modules/Custom/#', '', $current);
 
-// 2) On fragmente après “Modules/Custom/”
-$parts = preg_split(
-    '#'.preg_quote(DIRECTORY_SEPARATOR.'Modules'.DIRECTORY_SEPARATOR.'Custom'.DIRECTORY_SEPARATOR, '#').'#',
-    $fullDir,
-    2
-);
+// 4) Assemble URL to App/settings.php
+$settingsUrl = "{$scheme}://{$host}{$root}Modules/Custom/" . ltrim($relative, '/') . "/App/settings.php";
 
-// 3) Reconstruit la partie “ianseo-ui-simplifier-main/ianseo-ui-simplifier/App”
-if (count($parts) === 2) {
-    $modulePath = str_replace(DIRECTORY_SEPARATOR, '/', rtrim($parts[1], '/'));
-} else {
-    $modulePath = '';
-}
+// 5) Inject into the menu config
+$View = "Affichage";
+$ret['MODS']['uiSimplifier'] = "{$View} 🔒|{$settingsUrl}";
 
-// 4) Monte l’URL complète *avec* le slash manquant
-$scheme  = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host    = $_SERVER['HTTP_HOST'];
-$rootDir = rtrim($CFG->ROOT_DIR, '/').'/';
+// -------------------------------------------------
+// Ultra Basic mode: read flag from cookie
+if (!empty($_COOKIE['ultra_basic']) && $_COOKIE['ultra_basic'] === '1') {
+    // Load and inject Ultra Basic CSS
+    require_once __DIR__ . '/App/ultra-basic.css.php';
+    $css = getUltraBasicCSS() ?? '';
+    if ($css !== '') {
+        echo "\n<!-- Ultra Basic CSS injected -->\n<style>\n{$css}\n</style>\n";
+    } else {
+        echo "<!-- Ultra Basic CSS generated but empty -->\n";
+    }
 
-$url = sprintf(
-    '%s://%s%sModules/Custom/%s/App/settings.php',
-    $scheme,
-    $host,
-    $rootDir,
-    $modulePath
-);
-
-// 5) Injection dans le menu
-$ret['MODS']['ui-simplifier'] = 'Affichages 🔒|'.$url;
-
-
-// on suppose que session_start() est déjà fait dans config.php
-
-
-
-
-// Lecture cookie au lieu de $_SESSION
-$ultraBasique = (isset($_COOKIE['ultra_basique']) && $_COOKIE['ultra_basique'] === '1');
-if ($ultraBasique) {
-require_once __DIR__ . '/App/ultra-basique.css.php';
-$css = getUltraBasiqueCSS();
-require_once __DIR__ . '/App/ultra-basique.js.php';
-$js = getUltraBasiqueJS();
-if ($css !== '') {
-    echo "\n<!-- Ultra basique CSS injecté -->\n";
-    echo "<style>\n{$css}</style>\n";
-} else {
-    echo "<!-- Ultra basique CSS généré, mais vide pour cette page -->\n";
-};
-if ($js !== '') {
-    echo "\n<!-- Ultra basique JS injecté -->\n";
-   echo <<<HTML
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  const nav = document.querySelector('#navigation > ul');
-  if (!nav) {
-    console.warn('[ui-simplifier] Navigation non trouvée, rien à faire.');
-    return;
-  }
-  if (!document.querySelector('#ui-simplifier-active-2')) {
-    nav.insertAdjacentHTML(
-      'beforeend',
-      '<li class="MenuTitle" id="ui-simplifier-active-2">' +
-      '<a style="font-size: 0.8em;font-weight: normal;pointer-events: none;"><i>{$js}</i></a>' +
-      '</li>'
-    );
-  }
-});
-</script>
-HTML;
-
-
-};}
-?>
-
+    // Load and inject Ultra Basic JS indicator
+    require_once __DIR__ . '/App/ultra-basic.js.php';
+    $icon = getUltraBasicJS() ?? '';
+    if ($icon !== '') {
+        echo "\n<!-- Ultra Basic JS injected -->\n";
+        echo <<<JS
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const stored = localStorage.getItem('hidden_menus');
-  if (!stored) return;
-  stored.split(',').forEach(function(href) {
-    if (!document.querySelector('#ui-simplifier-active-1')) {
-        document.querySelector('#navigation > ul')
-        .insertAdjacentHTML(
-          'beforeend',
-          '<li class="MenuTitle" id="ui-simplifier-active-1"><a style="font-size: 0.8em;font-weight: normal;pointer-events: none;"><i>Menus 🔒</i></a></li>'
+    const nav = document.querySelector('#navigation > ul');
+    if (!nav) return console.warn('[ui-simplifier] Navigation not found');
+    if (!document.getElementById('ui-simplifier-active-2')) {
+        nav.insertAdjacentHTML('beforeend',
+            '<li class="MenuTitle" id="ui-simplifier-active-2">' +
+            '<a style="font-size:0.8em; font-weight:normal; pointer-events:none;">' +
+            '<i>{$icon}</i>' +
+            '</a></li>'
         );
     }
-    document.querySelectorAll('li > a[href="' + href + '"]').forEach(function(el) {
-      // supprimer les <hr> consécutifs
-      let sib = el.parentNode.nextElementSibling;
-      while (sib && sib.tagName === 'HR') {
-        const toRem = sib;
-        sib = sib.nextElementSibling;
-        toRem.remove();
-      }
-      // puis le <li>
-      el.parentNode.remove();
-    });
-  });
-  // nettoyage des <ul> vides
-  document.querySelectorAll('ul').forEach(function(ul) {
-    if (!ul.querySelector('li')) ul.remove();
-  });
-  // suppression des <li> ne contenant que <a href="#url">
-  document.querySelectorAll('li').forEach(function(li) {
-    const a = li.querySelector(':scope > a[href="#url"]');
-    if (a && li.children.length === 1) li.remove();
-  });
-  // suppression des <hr> isolés
-  document.querySelectorAll('hr').forEach(function(hr) {
-    const prev = hr.previousElementSibling;
-    const next = hr.nextElementSibling;
-    if (!prev || prev.tagName !== 'LI' || !next || next.tagName !== 'LI') {
-      hr.remove();
-    }
-  });
-  // nettoyage des <ul> vides
-  document.querySelectorAll('ul').forEach(function(ul) {
-    if (!ul.querySelector('li')) ul.remove();
-  });
-  // suppression des <li> ne contenant que <a href="#url">
-  document.querySelectorAll('li').forEach(function(li) {
-    const a = li.querySelector(':scope > a[href="#url"]');
-    if (a && li.children.length === 1) li.remove();
-  });
 });
+</script>
+JS;
+    }
+}
+?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nav = document.querySelector('#navigation > ul');
+    const hidden = localStorage.getItem('hidden_menus');
+    if (nav && hidden) {
+        // Insert lock indicator once
+        if (!document.getElementById('ui-simplifier-active-1')) {
+            nav.insertAdjacentHTML('beforeend',
+                '<li class="MenuTitle" id="ui-simplifier-active-1">' +
+                '<a style="font-size:0.8em;font-weight:normal;pointer-events:none;">' +
+                '<i>Menus 🔒</i></a></li>'
+            );
+        }
+        // Remove hidden menu items and any <hr> siblings
+        hidden.split(',').forEach(href => {
+            document.querySelectorAll(`li > a[href="${href}"]`).forEach(link => {
+                let sib = link.parentNode.nextElementSibling;
+                while (sib && sib.tagName === 'HR') {
+                    const toRemove = sib;
+                    sib = sib.nextElementSibling;
+                    toRemove.remove();
+                }
+                link.parentNode.remove();
+            });
+        });
+    }
 
-
-
-
-
-/*
-
-
-if (!document.querySelector('#ui-simplifier-active')) {
-    document.querySelector('#navigation > ul').insertAdjacentHTML('beforeend',
-        '<li class=\"MenuTitle\" id=\"ui-simplifier-active\">' +
-        '<a style=\"font-size: 0.8em;font-weight: normal;pointer-events: none;\"><i>des éléments sont cachés</i></a>' +
-        '</li>'
-    );
-}*/
-
-
+    // Cleanup function: remove empty lists, placeholder-only items, and stray <hr>
+    (function cleanup() {
+        document.querySelectorAll('ul').forEach(ul => {
+            if (!ul.querySelector('li')) ul.remove();
+        });
+        document.querySelectorAll('li').forEach(li => {
+            const placeholder = li.querySelector(':scope > a[href="#url"]');
+            if (placeholder && li.children.length === 1) li.remove();
+        });
+        document.querySelectorAll('hr').forEach(hr => {
+            const prev = hr.previousElementSibling;
+            const next = hr.nextElementSibling;
+            if (!prev || prev.tagName !== 'LI' || !next || next.tagName !== 'LI') {
+                hr.remove();
+            }
+        });
+    })();
+});
 </script>
