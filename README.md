@@ -1,7 +1,7 @@
 
 # ianseo-ui-simplifier
 
-> 🇫🇷 Module personnalisable pour ianseo afin de simplifier son interface en masquant certains menus et en améliorant l’expérience utilisateur.  
+> 🇫🇷 Module personnalisable pour ianseo afin de simplifier son interface en masquant certains menus et en améliorant l’expérience utilisateur.
 > 🇬🇧 Customizable module for ianseo to simplify its user interface by hiding some menus and improving usability.
 
 ---
@@ -11,6 +11,9 @@
 - Masque des menus ou sections pour les utilisateurs.
 - S’intègre dans le répertoire `Modules/Custom` pour rester intact lors des mises à jour de ianseo.
 - Compatible avec d’autres modules personnalisés.
+- Mise à jour du module et des pré-configurations recommandées via l'interface utilisateur.
+- Les pré-configurations peuvent être adaptées.
+- Compatibilité multilingue.
 
 ---
 
@@ -26,16 +29,30 @@
 
 ```
 htdocs/
+├── index.php
+├── Common/
+│   ├── Menu.php
+│   └── Templates/
+│       └── head.php
 └── Modules/
     └── Custom/
-        ├── ianseo-ui-simplifier/
-        │   ├── App/
-        │   │   └── correspondance.csv
-        │   │   └── settings.php
-        │   └── menu.php
-        ├── menu.php
-        ├── LICENSE
-        └── README.md
+        ├── menu.php               ← inclut le module ianseo-ui-simplifier
+        └── ianseo-ui-simplifier/
+            ├── menu.php           ← logique d’injection & de chargement
+            └── App/
+                ├── settings.php         ← page de config / UI
+                ├── download_csv.php     ← export CSV (menus.csv / elements.csv)
+                ├── ultra-basique.css.php
+                ├── ultra-basique.js.php
+                ├── menus.csv
+                ├── elements.csv
+                └── Languages/           ← traductions par langue
+                    ├── en.php
+                    ├── fr.php
+                    ├── it.php
+                    ├── es.php
+                    ├── de.php
+                    └── … (autres codes ISO)
 ```
 
 ---
@@ -60,6 +77,9 @@ Cela permet à plusieurs modules de coexister en toute sécurité.
 - Hides some menus or sections for users.
 - Installs in `Modules/Custom` and survives ianseo updates.
 - Compatible with other custom modules.
+- Recommended module and pre-configuration updates via the user interface.
+- The pre-configurations can be adapted.
+- Multilingual compatibility.
 
 ### Installation
 1. Download or clone this repository.
