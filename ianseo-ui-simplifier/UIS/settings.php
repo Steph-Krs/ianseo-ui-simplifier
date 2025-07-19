@@ -71,11 +71,10 @@ if (isset($_POST['update_module'])) {
 }
 
 /**
- * Download, extract, and replace the module directory.
+ * Find the root directory of the current module (contains UIS/settings.php).
  *
- * @return string Success or error message.
+ * @return string|null
  */
-
 function findCurrentModulePath(): ?string {
     $dir = __DIR__;
     while (true) {
@@ -84,103 +83,42 @@ function findCurrentModulePath(): ?string {
         }
         $parent = dirname($dir);
         if ($parent === $dir) {
-            return null; // pas trouvé
+            return null;
         }
         $dir = $parent;
     }
 }
 
-function updateUiSimplifierModule(): void
-{
-    @ob_implicit_flush(true);
-    @ob_end_flush();
-
-    $zipUrl      = 'https://github.com/Steph-Krs/ianseo-ui-simplifier/archive/refs/heads/main.zip';
-    $tmpZipPath  = sys_get_temp_dir() . '/ianseo-ui-simplifier.zip';
-    $tmpExtract  = sys_get_temp_dir() . '/ianseo-ui-simplifier';
-
-    echo '⏳ Start of the update...<br>';
-    flush();
-
-    // 1) Download ZIP archive
-    $downloadedContent = @file_get_contents($zipUrl);
-    if ($downloadedContent === false) {
-        echo '❌ Failed to download ZIP archive.<br>';
+/**
+ * Delete only the contents of a directory, except those named in $skipNames.
+ *
+ * @param string    $dir        Absolute path to clear
+ * @param string[]  $skipNames  List of entry-names (not paths) to keep
+ */
+function clearDirectory(string $dir, array $skipNames = []): void {
+    if (!is_dir($dir)) {
         return;
     }
-    if (@file_put_contents($tmpZipPath, $downloadedContent) === false) {
-        echo '❌ Unable to write the ZIP archive.<br>';
-        return;
+    foreach (scandir($dir) as $item) {
+        if ($item === '.' || $item === '..' || in_array($item, $skipNames, true)) {
+            continue;
+        }
+        $path = $dir . DIRECTORY_SEPARATOR . $item;
+        if (is_dir($path)) {
+            deleteDirectoryRecursively($path);
+        } else {
+            unlink($path);
+        }
     }
-    echo '📥 Downloaded ZIP archive.<br>';
-    flush();
-
-    // 2) Extraction
-    $zip = new ZipArchive();
-    if (($res = $zip->open($tmpZipPath)) !== true) {
-        echo '❌ Unable to open the ZIP archive. Code : ' . $res . '<br>';
-        return;
-    }
-
-    if (is_dir($tmpExtract)) {
-        deleteDirectoryRecursively($tmpExtract);
-        echo '🧹 Old temporary folder deleted.<br>';
-        flush();
-    }
-
-    if (!$zip->extractTo($tmpExtract)) {
-        echo '❌ Failed extraction.<br>';
-        return;
-    }
-    $zip->close();
-    echo '📂 Extracted archive.<br>';
-    flush();
-
-    // 3) Copy
-    $sourceDir      = $tmpExtract . '/ianseo-ui-simplifier-main';
-    $destinationDir = findCurrentModulePath();
-    if (!$destinationDir) {
-        echo '❌ Could not locate the current module directory.<br>';
-        return;
-    }
-
-    if (!is_dir($sourceDir)) {
-        echo '❌ Unexpected archive structure: source folder missing.<br>';
-        return;
-    }
-    deleteDirectoryRecursively($destinationDir);
-    recurseCopy($sourceDir, $destinationDir);
-    echo '♻️ Copied files.<br>';
-    flush();
-
-    // 4) Cleaning
-    @unlink($tmpZipPath);
-    deleteDirectoryRecursively($tmpExtract);
-    echo '🧹 Temporary files cleaned up.<br>';
-    flush();
-
-    
-    echo <<<HTML
-<div id="success">✅ Update complete! 🔄 You will be redirected...</div>
-<script>
-setTimeout(function() {
-    window.location.href = window.location.href;
-}, 1500);
-</script>
-HTML;
 }
 
 /**
  * Recursively copy files and directories from source to destination.
- *
- * @param string $src Source directory
- * @param string $dst Destination directory
- * @return void
  */
 function recurseCopy(string $src, string $dst): void
 {
     $dir = opendir($src);
-    @mkdir($dst, 0755, true);
+    @mkdir($dst, 0775, true);
     while (($file = readdir($dir)) !== false) {
         if ($file === '.' || $file === '..') {
             continue;
@@ -198,9 +136,6 @@ function recurseCopy(string $src, string $dst): void
 
 /**
  * Recursively delete a directory and all its contents.
- *
- * @param string $directory
- * @return void
  */
 function deleteDirectoryRecursively(string $directory): void
 {
@@ -219,6 +154,96 @@ function deleteDirectoryRecursively(string $directory): void
         }
     }
     rmdir($directory);
+}
+
+/**
+ * Download, extract, and replace the module directory (without deleting UIS prematurely).
+ */
+function updateUiSimplifierModule(): void
+{
+    @ob_implicit_flush(true);
+    @ob_end_flush();
+
+    $zipUrl      = 'https://github.com/Steph-Krs/ianseo-ui-simplifier/archive/refs/heads/main.zip';
+    $tmpZipPath  = sys_get_temp_dir() . '/ianseo-ui-simplifier.zip';
+    $tmpExtract  = sys_get_temp_dir() . '/ianseo-ui-simplifier';
+
+    echo '⏳ Start of the update...<br>';
+    flush();
+
+    // 1) Download
+    $dl = @file_get_contents($zipUrl);
+    if ($dl === false) {
+        echo '❌ Failed to download ZIP archive.<br>';
+        return;
+    }
+    if (@file_put_contents($tmpZipPath, $dl) === false) {
+        echo '❌ Unable to write ZIP archive.<br>';
+        return;
+    }
+    echo '📥 Downloaded ZIP archive.<br>';
+    flush();
+
+    // 2) Extract
+    $zip = new ZipArchive();
+    if (($res = $zip->open($tmpZipPath)) !== true) {
+        echo '❌ Unable to open the ZIP archive. Code: ' . $res . '<br>';
+        return;
+    }
+    if (is_dir($tmpExtract)) {
+        deleteDirectoryRecursively($tmpExtract);
+        echo '🧹 Old temp folder deleted.<br>';
+        flush();
+    }
+    if (!$zip->extractTo($tmpExtract)) {
+        echo '❌ Failed extraction.<br>';
+        return;
+    }
+    $zip->close();
+    echo '📂 Archive extracted.<br>';
+    flush();
+
+    // 3) Locate module folder
+    $destinationDir = findCurrentModulePath();
+    if (!$destinationDir) {
+        echo '❌ Could not locate the current module directory.<br>';
+        return;
+    }
+
+    // 4) Prepare source path inside ZIP
+    $sourceDir = $tmpExtract . '/ianseo-ui-simplifier-main/ianseo-ui-simplifier';
+    if (!is_dir($sourceDir)) {
+        echo '❌ Unexpected ZIP structure: source folder missing.<br>';
+        return;
+    }
+
+    // 5) Clear existing module, but skip UIS so we don't delete settings.php in mid-flight
+    echo '🧹 Clearing module directory (except UIS)…<br>';
+    flush();
+    clearDirectory($destinationDir, ['UIS']);
+
+    // 6) Copy new files (this will overwrite UIS/settings.php)
+    echo '♻️ Copying new files into module directory…<br>';
+    flush();
+    recurseCopy($sourceDir, $destinationDir);
+    echo '✅ Files updated.<br>';
+    flush();
+
+    // 7) Cleanup temp
+    @unlink($tmpZipPath);
+    deleteDirectoryRecursively($tmpExtract);
+    echo '🧹 Temporary files cleaned up.<br>';
+    flush();
+
+    // 8) Final message + redirect
+    echo <<<HTML
+<div id="success">✅ Update complete! 🔄 Redirecting...</div>
+<script>
+setTimeout(function() {
+    window.location.reload();
+}, 1500);
+</script>
+HTML;
 }
 
 // -------------------------------------------------
