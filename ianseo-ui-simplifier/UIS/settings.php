@@ -240,7 +240,7 @@ function updateUiSimplifierModule(): void
 <div id="success">✅ Update complete! 🔄 Redirecting...</div>
 <script>
 setTimeout(function() {
-    window.location.reload();
+    window.location.href = window.location.href;
 }, 1500);
 </script>
 HTML;
