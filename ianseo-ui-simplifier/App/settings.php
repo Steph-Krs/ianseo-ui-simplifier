@@ -120,7 +120,15 @@ function updateUiSimplifierModule(): void
     echo '🧹 Temporary files cleaned up.<br>';
     flush();
 
-    echo '✅ Update complete! 🔄 You can reload the page if necessary.<br>';
+    
+    echo <<<HTML
+<div id="success">✅ Update complete! 🔄 You will be redirected...</div>
+<script>
+setTimeout(function() {
+    window.location.href = window.location.href;
+}, 1500);
+</script>
+HTML;
 }
 
 /**
@@ -599,7 +607,7 @@ function multiGetText(string $key): string
               <td colspan="3"></td>
             </tr>
             <tr>
-              <th colspan="3">
+              <th class="Title" colspan="3">
                 <?= htmlspecialchars(multiGetText('UIS-Update'), ENT_QUOTES, 'UTF-8') ?>
               </th>
             </tr>
@@ -859,14 +867,6 @@ function multiGetText(string $key): string
 
 
 <script>
-  // Update inforations in #saved
-  function updateModule() {
-    document.getElementById('saved').innerHTML = '';
-    document.getElementById('saved').innerHTML =
-        '<iframe src="?updateModule=1" style="width:100%;height:200px;border:none;"></iframe>';
-}
-
-
   // Download CSV buttons
   document.getElementById('download-menus').addEventListener('click', function() {
     // Redirect to download menus.csv
