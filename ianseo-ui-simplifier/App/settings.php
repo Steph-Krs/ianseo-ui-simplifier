@@ -53,6 +53,7 @@ if (isset($_POST['update_module'])) {
        . htmlspecialchars($updateResult)
        . '</div>';
 }
+
 /**
  * Download, extract, and replace the module directory.
  *
@@ -64,37 +65,53 @@ function updateUiSimplifierModule(): string
     $tmpZipPath  = sys_get_temp_dir() . '/ianseo-ui-simplifier.zip';
     $tmpExtract  = sys_get_temp_dir() . '/ianseo-ui-simplifier';
 
-    // 1) Download the ZIP archive
-    if (file_put_contents($tmpZipPath, fopen($zipUrl, 'r')) === false) {
+    $statusMessages = [];
+
+    // 1) Download ZIP archive
+    $downloadedContent = @file_get_contents($zipUrl);
+    if ($downloadedContent === false) {
         return '❌ Failed to download the ZIP archive.';
     }
+    if (@file_put_contents($tmpZipPath, $downloadedContent) === false) {
+        return '❌ Unable to write the ZIP archive to the temporary folder.';
+    }
+    $statusMessages[] = '📥 Archive ZIP downloaded.';
 
-    // 2) Open and extract the archive
+    // 2) Opening and extracting the archive
     $zip = new ZipArchive();
-    if ($zip->open($tmpZipPath) !== true) {
-        return '❌ Unable to open the ZIP archive.';
+    if (($res = $zip->open($tmpZipPath)) !== true) {
+        return '❌ Unable to open the ZIP archive. Error : ' . $res;
     }
-    // Remove any previous extraction if it exists
+    
+    // Deleting a previous extraction
     if (is_dir($tmpExtract)) {
-        rrmdir($tmpExtract);
+        deleteDirectoryRecursively($tmpExtract);
+        $statusMessages[] = '🧹 Old temporary folder deleted.';
     }
-    $zip->extractTo($tmpExtract);
-    $zip->close();
 
-    // 3) Copy extracted files into the module directory
-    $sourceDir      = $tmpExtract . '/ianseo-ui-simplifier-main'; // folder inside the ZIP
+    if (!$zip->extractTo($tmpExtract)) {
+        return '❌ Archive extraction failed.';
+    }
+    $zip->close();
+    $statusMessages[] = '📂 Extracted archive.';
+
+    // 3) Copy extracted files to the module directory
+    $sourceDir      = $tmpExtract . '/ianseo-ui-simplifier-main';
     $destinationDir = dirname(__DIR__, 2);
 
     if (!is_dir($sourceDir)) {
-        return '❌ Unexpected ZIP structure: source folder not found.';
+        return '❌ Unexpected archive structure: source folder not found.';
     }
+    
     recurseCopy($sourceDir, $destinationDir);
+    $statusMessages[] = '♻️ Files copied successfully.';
 
-    // 4) Clean up temporary files
-    unlink($tmpZipPath);
-    rrmdir($tmpExtract);
+    // 4) Cleaning up temporary files
+    @unlink($tmpZipPath);
+    deleteDirectoryRecursively($tmpExtract);
+    $statusMessages[] = '🧹 Temporary files cleaned up.';
 
-    return '✅ Module updated successfully! Please reload the page if needed.';
+    return '✅Module successfully updated! <br>' . implode('<br>', $statusMessages) . '<br>🔄 Reload the page if necessary.';
 }
 
 /**
@@ -833,6 +850,9 @@ function multiGetText(string $key): string
 
 
 <script>
+  // Update inforations in #saved
+  document.getElementById('saved').innerHTML = '<?= updateUiSimplifierModule(); ?>';
+
   // Download CSV buttons
   document.getElementById('download-menus').addEventListener('click', function() {
     // Redirect to download menus.csv
