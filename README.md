@@ -19,7 +19,7 @@
 
 ## 📥 Installation
 
-1. Téléchargez ou clonez ce dépôt.
+1. Téléchargez ou clonez ce dépôt. (Bouton vert en haut à droite de la page `<> Code` puis `Download ZIP`)
 2. Copiez le dossier `ianseo-ui-simplifier` **et** le fichier `menu.php` fournis dans ce dépôt dans le dossier :  
 
    - sous Windows/Mac : `htdocs/Modules/Custom/`
