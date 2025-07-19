@@ -10,12 +10,12 @@ $root = rtrim($GLOBALS['CFG']->ROOT_DIR, '/') . '/';
 $current = str_replace('\\', '/', __DIR__);
 $relative = preg_replace('#^.*?/Modules/Custom/#', '', $current);
 
-// 4) Assemble URL to App/settings.php
-$settingsUrl = "{$scheme}://{$host}{$root}Modules/Custom/" . ltrim($relative, '/') . "/App/settings.php";
+// 4) Assemble URL to UIS/settings.php
+$settingsUrl = "{$scheme}://{$host}{$root}Modules/Custom/" . ltrim($relative, '/') . "/UIS/settings.php";
 
 // 5) Add the menu in the corresponding language
 $lang = [];
-$langFile = __DIR__.'/App/Languages/'.(
+$langFile = __DIR__.'/UIS/Languages/'.(
     $GLOBALS['CFG']->lang
     ?? (preg_match(
           '/\[\[[^\]]+\]@\[(?<l>[a-z]{2})\]@/i',
@@ -31,7 +31,7 @@ $ret['MODS']['uiSimplifier'] = "$label 🔒|$settingsUrl";
 // Ultra Basic mode: read flag from cookie
 if (!empty($_COOKIE['ultra_basic']) && $_COOKIE['ultra_basic'] === '1') {
     // Load and inject Ultra Basic CSS
-    require_once __DIR__ . '/App/ultra-basic.css.php';
+    require_once __DIR__ . '/UIS/ultra-basic.css.php';
     $css = getUltraBasicCSS() ?? '';
     if ($css !== '') {
         echo "\n<!-- Ultra Basic CSS injected -->\n<style>\n{$css}\n</style>\n";
@@ -40,7 +40,7 @@ if (!empty($_COOKIE['ultra_basic']) && $_COOKIE['ultra_basic'] === '1') {
     }
 
     // Load and inject Ultra Basic JS indicator
-    require_once __DIR__ . '/App/ultra-basic.js.php';
+    require_once __DIR__ . '/UIS/ultra-basic.js.php';
     $icon = getUltraBasicJS() ?? '';
     if ($icon !== '') {
         echo "\n<!-- Ultra Basic JS injected -->\n";
