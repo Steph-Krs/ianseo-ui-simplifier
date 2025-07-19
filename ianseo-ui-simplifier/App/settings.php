@@ -46,72 +46,81 @@ echo '<!-- DEBUG SETTINGS | ultra_basic cookie=' . ($_COOKIE['ultra_basic'] ?? '
 // Initialize hidden menus list (managed via localStorage in JS)
 $hiddenMenus = [];
 
-// 5) Handle module update action
 if (isset($_POST['update_module'])) {
-    $updateResult = updateUiSimplifierModule();
-    echo '<div style="margin:1em 0; padding:0.5em; background:#eef; border:1px solid #99c;">'
-       . htmlspecialchars($updateResult)
-       . '</div>';
+    updateUiSimplifierModule();
+    exit;
 }
-
 /**
  * Download, extract, and replace the module directory.
  *
  * @return string Success or error message.
  */
-function updateUiSimplifierModule(): string
+function updateUiSimplifierModule(): void
 {
+    @ob_implicit_flush(true);
+    @ob_end_flush();
+
     $zipUrl      = 'https://github.com/Steph-Krs/ianseo-ui-simplifier/archive/refs/heads/main.zip';
     $tmpZipPath  = sys_get_temp_dir() . '/ianseo-ui-simplifier.zip';
     $tmpExtract  = sys_get_temp_dir() . '/ianseo-ui-simplifier';
 
-    $statusMessages = [];
+    echo '⏳ Start of the update...<br>';
+    flush();
 
     // 1) Download ZIP archive
     $downloadedContent = @file_get_contents($zipUrl);
     if ($downloadedContent === false) {
-        return '❌ Failed to download the ZIP archive.';
+        echo '❌ Failed to download ZIP archive.<br>';
+        return;
     }
     if (@file_put_contents($tmpZipPath, $downloadedContent) === false) {
-        return '❌ Unable to write the ZIP archive to the temporary folder.';
+        echo '❌ Unable to write the ZIP archive.<br>';
+        return;
     }
-    $statusMessages[] = '📥 Archive ZIP downloaded.';
+    echo '📥 Downloaded ZIP archive.<br>';
+    flush();
 
-    // 2) Opening and extracting the archive
+    // 2) Extraction
     $zip = new ZipArchive();
     if (($res = $zip->open($tmpZipPath)) !== true) {
-        return '❌ Unable to open the ZIP archive. Error : ' . $res;
+        echo '❌ Unable to open the ZIP archive. Code : ' . $res . '<br>';
+        return;
     }
-    
-    // Deleting a previous extraction
+
     if (is_dir($tmpExtract)) {
         deleteDirectoryRecursively($tmpExtract);
-        $statusMessages[] = '🧹 Old temporary folder deleted.';
+        echo '🧹 Old temporary folder deleted.<br>';
+        flush();
     }
 
     if (!$zip->extractTo($tmpExtract)) {
-        return '❌ Archive extraction failed.';
+        echo '❌ Failed extraction.<br>';
+        return;
     }
     $zip->close();
-    $statusMessages[] = '📂 Extracted archive.';
+    echo '📂 Extracted archive.<br>';
+    flush();
 
-    // 3) Copy extracted files to the module directory
+    // 3) Copy
     $sourceDir      = $tmpExtract . '/ianseo-ui-simplifier-main';
     $destinationDir = dirname(__DIR__, 2);
 
     if (!is_dir($sourceDir)) {
-        return '❌ Unexpected archive structure: source folder not found.';
+        echo '❌ Unexpected archive structure: source folder missing.<br>';
+        return;
     }
-    
-    recurseCopy($sourceDir, $destinationDir);
-    $statusMessages[] = '♻️ Files copied successfully.';
 
-    // 4) Cleaning up temporary files
+    recurseCopy($sourceDir, $destinationDir);
+    echo '♻️ Copied files.<br>';
+    flush();
+
+    // 4) Cleaning
     @unlink($tmpZipPath);
     deleteDirectoryRecursively($tmpExtract);
-    $statusMessages[] = '🧹 Temporary files cleaned up.';
+    echo '🧹 Temporary files cleaned up.<br>';
+    flush();
 
-    return '✅Module successfully updated! <br>' . implode('<br>', $statusMessages) . '<br>🔄 Reload the page if necessary.';
+    echo '✅ Update complete! 🔄 You can reload the page if necessary.<br>';
 }
 
 /**
@@ -851,7 +860,12 @@ function multiGetText(string $key): string
 
 <script>
   // Update inforations in #saved
-  document.getElementById('saved').innerHTML = '<?= updateUiSimplifierModule(); ?>';
+  function updateModule() {
+    document.getElementById('saved').innerHTML = '';
+    document.getElementById('saved').innerHTML =
+        '<iframe src="?updateModule=1" style="width:100%;height:200px;border:none;"></iframe>';
+}
+
 
   // Download CSV buttons
   document.getElementById('download-menus').addEventListener('click', function() {
