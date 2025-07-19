@@ -24,6 +24,11 @@
 
    - sous Windows/Mac : `htdocs/Modules/Custom/`
    - sous Linux : `ianseo/Modules/Custom/`
+      *sous Linux, executez la commande :
+     ```bash
+     sudo chmod -R 777 /opt/ianseo/Modules/Custom/ianseo-ui-simplifier/
+     ```
+     Cela permettra les mises à jours via le module lui-même.
 
 ### 🗂️ Arborescence attendue :
 
@@ -86,6 +91,11 @@ Cela permet à plusieurs modules de coexister en toute sécurité.
 2. Copy the folder `ianseo-ui-simplifier` **and** the file `menu.php` to:
    - on Windows/Mac: `htdocs/Modules/Custom/`
    - on Linux: `ianseo/Modules/Custom/`
+     *Under Linux, run the command :
+     ```bash
+     sudo chmod -R 777 /opt/ianseo/Modules/Custom/ianseo-ui-simplifier/
+     ```
+     This will enable updates via the module itself.
 
 ### If another custom module already uses `menu.php`
 Open the existing `menu.php` and add:
