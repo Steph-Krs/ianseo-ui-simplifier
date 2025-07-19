@@ -476,7 +476,7 @@ function multiGetText(string $key): string
                   <?= htmlspecialchars(multiGetText('Base'), ENT_QUOTES, 'UTF-8') ?>
                 </button>
               </th>
-              <td>
+              <td class="blinking">
                 <table style="width: 100%">
                   <tbody>
                     <tr>
