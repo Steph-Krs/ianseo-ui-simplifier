@@ -1,7 +1,8 @@
 
 # ianseo-ui-simplifier
 
-> 🇫🇷 Module personnalisable pour ianseo afin de simplifier son interface en masquant certains menus et en améliorant l’expérience utilisateur.
+> 🇫🇷 Module personnalisable pour ianseo afin de simplifier son interface en masquant certains menus et en améliorant l’expérience utilisateur.  
+>   
 > 🇬🇧 Customizable module for ianseo to simplify its user interface by hiding some menus and improving usability.
 
 ---
