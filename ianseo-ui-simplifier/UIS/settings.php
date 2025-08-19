@@ -553,11 +553,6 @@ function multiGetText(string $key): string
                         <?= htmlspecialchars(multiGetText('UIS-BaseLimits'), ENT_QUOTES, 'UTF-8') ?>
                       </td>
                     </tr>
-                    <tr>
-                      <td>
-                        <p><i><?= htmlspecialchars(multiGetText('UIS-BaseQuote'), ENT_QUOTES, 'UTF-8') ?></i> – <?= htmlspecialchars(multiGetText('UIS-BaseQuoteFrom'), ENT_QUOTES, 'UTF-8') ?></p>
-                      </td>
-                    </tr>
                   </tbody>
                 </table>
               </td>
@@ -613,11 +608,6 @@ function multiGetText(string $key): string
                         <?= htmlspecialchars(multiGetText('UIS-AdvencedLimits'), ENT_QUOTES, 'UTF-8') ?>
                       </td>
                     </tr>
-                    <tr>
-                      <td>
-                        <p><i><?= htmlspecialchars(multiGetText('UIS-AdvancedQuote'), ENT_QUOTES, 'UTF-8') ?></i> – <?= htmlspecialchars(multiGetText('UIS-AdvancedQuoteFrom'), ENT_QUOTES, 'UTF-8') ?></p>
-                      </td>
-                    </tr>
                   </tbody>
                 </table>
               </td>
@@ -639,11 +629,6 @@ function multiGetText(string $key): string
                     <tr>
                       <td>
                         <?= htmlspecialchars(multiGetText('UIS-ExpertLimits'), ENT_QUOTES, 'UTF-8') ?>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>
-                        <p><i><?= htmlspecialchars(multiGetText('UIS-ExpertQuote'), ENT_QUOTES, 'UTF-8') ?></i> – <?= htmlspecialchars(multiGetText('UIS-ExpertQuoteFrom'), ENT_QUOTES, 'UTF-8') ?></p>
                       </td>
                     </tr>
                   </tbody>
@@ -1142,3 +1127,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
+
